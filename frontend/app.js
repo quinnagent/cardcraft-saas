@@ -269,21 +269,33 @@ function updateMessage(index, newMessage) {
     currentState.guests[index].message = newMessage;
 }
 
-// Preview Examples
+// Preview Examples - Show actual card visuals
 function showPreviewExamples() {
     const grid = document.getElementById('previewExamplesGrid');
     const totalCount = document.getElementById('totalCardCount');
     
     // Show first 4 guests as examples
     const examples = currentState.guests.slice(0, 4);
+    const template = currentState.template || 'classic';
     
-    grid.innerHTML = examples.map(guest => `
+    grid.innerHTML = examples.map((guest, index) => {
+        // Get first name for signature
+        const firstNames = "Collin and Annika";
+        
+        return `
         <div class="preview-example-card">
-            <h4>Dear ${guest.name}</h4>
-            <div class="gift-tag">${guest.gift}</div>
-            <div class="message-preview">"${guest.message.substring(0, 150)}..."</div>
+            <div class="preview-card-visual ${template}">
+                <div class="preview-card-header">Thank You</div>
+                <div class="preview-card-recipient">Dear ${guest.name},</div>
+                <div class="preview-card-message">${guest.message}</div>
+                <div class="preview-card-signature">${firstNames}</div>
+            </div>
+            <div class="preview-card-info">
+                <h4>${guest.name}</h4>
+                <div class="gift-tag">${guest.gift}</div>
+            </div>
         </div>
-    `).join('');
+    `}).join('');
     
     totalCount.textContent = currentState.guests.length;
     
