@@ -439,7 +439,7 @@ function closePaymentModal() {
 }
 
 // Initialize Stripe
-const stripe = Stripe('pk_test_your_publishable_key'); // Replace with your pk_test key
+const stripe = Stripe('pk_live_51SvqbT2Oew1Lm9HTRyzIMLCabQLvxAyCEE5Pl4j1xGuxAqzx3CMNMzsbNgpEx3dNgZztdJHGd9Tg1SOWQaQgBYeK00PygXjyxH');
 let cardElement;
 
 // Initialize card element when payment modal opens
@@ -473,45 +473,100 @@ document.getElementById('paymentForm')?.addEventListener('submit', async (e) => 
     btn.textContent = 'Processing...';
     btn.disabled = true;
     
+    const email = document.getElementById('emailInput').value;
+    const password = document.getElementById('passwordInput').value;
+    
     try {
-        // 1. Create payment intent on backend
-        const response = await fetch(`${API_URL}/create-payment`, {
+        // 1. Register user first
+        const registerRes = await fetch(`${API_URL}/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        
+        if (!registerRes.ok) {
+            // Try login if already exists
+            const loginRes = await fetch(`${API_URL}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            if (!loginRes.ok) throw new Error('Invalid email or password');
+            const loginData = await loginRes.json();
+            currentState.token = loginData.token;
+            currentState.userId = loginData.user.id;
+        } else {
+            const registerData = await registerRes.json();
+            currentState.token = registerData.token;
+            currentState.userId = registerData.user.id;
+        }
+        
+        // 2. Create project
+        const projectRes = await fetch(`${API_URL}/projects`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${currentState.token || 'demo-token'}`
+                'Authorization': `Bearer ${currentState.token}`
             },
             body: JSON.stringify({
-                projectId: currentState.projectId || 1,
+                template: currentState.template || 'classic',
+                cardsPerPage: currentState.cardsPerPage || 4
+            })
+        });
+        const projectData = await projectRes.json();
+        currentState.projectId = projectData.id;
+        
+        // 3. Upload guest data (convert current guests to cards)
+        if (currentState.guests && currentState.guests.length > 0) {
+            // Create a simple CSV from guest data
+            const csvContent = currentState.guests.map(g => 
+                `${g.name},${g.gift},"${g.message || ''}"`
+            ).join('\n');
+            const blob = new Blob([`Name,Gift,Message\n${csvContent}`], { type: 'text/csv' });
+            const formData = new FormData();
+            formData.append('file', blob, 'guests.csv');
+            
+            await fetch(`${API_URL}/projects/${currentState.projectId}/upload`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${currentState.token}` },
+                body: formData
+            });
+        }
+        
+        // 4. Create payment intent
+        const paymentRes = await fetch(`${API_URL}/create-payment`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${currentState.token}`
+            },
+            body: JSON.stringify({
+                projectId: currentState.projectId,
                 plan: currentState.currentPlan || 'premium'
             })
         });
         
-        const { clientSecret } = await response.json();
+        const { clientSecret } = await paymentRes.json();
         
-        // 2. Confirm payment with Stripe
+        // 5. Confirm payment with Stripe
         const { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
             payment_method: {
                 card: cardElement,
-                billing_details: {
-                    email: document.getElementById('emailInput').value
-                }
+                billing_details: { email }
             }
         });
         
-        if (error) {
-            throw new Error(error.message);
-        }
+        if (error) throw new Error(error.message);
         
-        // 3. Confirm on backend
+        // 6. Confirm on backend (this triggers email)
         await fetch(`${API_URL}/confirm-payment`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${currentState.token || 'demo-token'}`
+                'Authorization': `Bearer ${currentState.token}`
             },
             body: JSON.stringify({
-                projectId: currentState.projectId || 1,
+                projectId: currentState.projectId,
                 paymentIntentId: paymentIntent.id
             })
         });
