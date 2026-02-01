@@ -438,23 +438,104 @@ function closePaymentModal() {
     closePayment();
 }
 
+// Initialize Stripe
+const stripe = Stripe('pk_test_your_publishable_key'); // Replace with your pk_test key
+let cardElement;
+
+// Initialize card element when payment modal opens
+function initStripe() {
+    if (!cardElement) {
+        const elements = stripe.elements();
+        cardElement = elements.create('card', {
+            style: {
+                base: {
+                    fontSize: '16px',
+                    color: '#3d3d3d',
+                    '::placeholder': { color: '#aab7c4' }
+                }
+            }
+        });
+        cardElement.mount('#cardElement');
+        
+        cardElement.on('change', (event) => {
+            const errorDiv = document.getElementById('cardErrors');
+            errorDiv.textContent = event.error ? event.error.message : '';
+        });
+    }
+}
+
 // Payment form submission
-document.getElementById('paymentForm')?.addEventListener('submit', (e) => {
+document.getElementById('paymentForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    // Simulate payment processing
-    const btn = e.target.querySelector('.pay-btn');
+    const btn = document.getElementById('payButton');
     const originalText = btn.textContent;
     btn.textContent = 'Processing...';
     btn.disabled = true;
     
-    setTimeout(() => {
-        alert('Payment successful! Your cards are ready for download. Check your email for the download link.');
+    try {
+        // 1. Create payment intent on backend
+        const response = await fetch(`${API_URL}/create-payment`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${currentState.token || 'demo-token'}`
+            },
+            body: JSON.stringify({
+                projectId: currentState.projectId || 1,
+                plan: currentState.currentPlan || 'premium'
+            })
+        });
+        
+        const { clientSecret } = await response.json();
+        
+        // 2. Confirm payment with Stripe
+        const { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
+            payment_method: {
+                card: cardElement,
+                billing_details: {
+                    email: document.getElementById('emailInput').value
+                }
+            }
+        });
+        
+        if (error) {
+            throw new Error(error.message);
+        }
+        
+        // 3. Confirm on backend
+        await fetch(`${API_URL}/confirm-payment`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${currentState.token || 'demo-token'}`
+            },
+            body: JSON.stringify({
+                projectId: currentState.projectId || 1,
+                paymentIntentId: paymentIntent.id
+            })
+        });
+        
+        alert('Payment successful! Check your email for the download link.');
         closePayment();
+        
+    } catch (err) {
+        document.getElementById('cardErrors').textContent = err.message;
+    } finally {
         btn.textContent = originalText;
         btn.disabled = false;
-    }, 2000);
+    }
 });
+
+// Initialize stripe when payment modal opens
+const originalOpenPayment = openPayment;
+openPayment = function(plan) {
+    currentState.currentPlan = plan;
+    const prices = { starter: 19, premium: 39, unlimited: 79 };
+    document.getElementById('payAmount').textContent = prices[plan];
+    document.getElementById('paymentModal').classList.add('active');
+    initStripe();
+};
 
 // Close modal on outside click
 document.getElementById('paymentModal')?.addEventListener('click', (e) => {

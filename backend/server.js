@@ -82,8 +82,8 @@ function generateFallbackMessage(guest, tone) {
 // CORS configuration
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://cardcraft.vercel.app', 'https://your-domain.com'] 
-    : ['http://localhost:8080', 'http://localhost:3000'],
+    ? ['https://quinnagent.github.io', 'https://cardcraft.vercel.app', 'https://your-domain.com'] 
+    : ['http://localhost:8080', 'http://localhost:3000', 'https://quinnagent.github.io'],
   credentials: true
 };
 app.use(cors(corsOptions));
