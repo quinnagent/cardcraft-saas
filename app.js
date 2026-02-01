@@ -496,14 +496,27 @@ async function generateAIMessages() {
         }));
         
         // Populate edit list
-        populateEditList();
+        try {
+            populateEditList();
+        } catch (e) {
+            console.error('Error in populateEditList:', e);
+            throw new Error('Failed to populate edit list: ' + e.message);
+        }
         
         // Go to simple edit view
-        showSection('simpleEdit');
+        try {
+            showSection('simpleEdit');
+        } catch (e) {
+            console.error('Error in showSection:', e);
+            throw new Error('Failed to show edit section: ' + e.message);
+        }
         
     } catch (error) {
-        alert('Error: ' + error.message + '\n\nPlease try again or write your own messages.');
-        console.error('AI generation error:', error);
+        console.error('Full error object:', error);
+        console.error('Error name:', error.name);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+        alert('Error: ' + (error.message || error.toString()) + '\n\nPlease try again or write your own messages.');
     } finally {
         loadingDiv.classList.remove('active');
         generateBtn.disabled = false;
