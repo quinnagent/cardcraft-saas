@@ -65,7 +65,8 @@ function initTemplateSelection() {
             document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
             card.classList.add('selected');
             currentState.template = card.dataset.template;
-            document.getElementById('templateContinue').disabled = false;
+            const errorMsg = document.getElementById('templateError');
+            if (errorMsg) errorMsg.style.display = 'none';
             updateProgressBar();
         });
     });
@@ -158,6 +159,16 @@ function startCreating() {
 }
 
 function goToUpload() {
+    if (!currentState.template) {
+        const errorMsg = document.getElementById('templateError');
+        if (errorMsg) {
+            errorMsg.style.display = 'block';
+            setTimeout(() => {
+                errorMsg.style.display = 'none';
+            }, 3000);
+        }
+        return;
+    }
     currentState.step = 2;
     updateProgressBar();
     showSection('upload');
