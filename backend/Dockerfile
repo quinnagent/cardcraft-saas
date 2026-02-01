@@ -1,6 +1,6 @@
 FROM node:18-slim
 
-# Install Chrome dependencies only (minimal set for Puppeteer)
+# Install Chrome dependencies (for puppeteer-core)
 RUN apt-get update && apt-get install -y \
     chromium \
     fonts-liberation \
@@ -36,10 +36,14 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
+# Tell puppeteer-core to use system Chromium and skip download
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install --production
+RUN npm ci --only=production
 
 COPY . .
 

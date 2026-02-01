@@ -6,7 +6,7 @@ const csv = require('csv-parser');
 const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('./database');
@@ -258,7 +258,10 @@ async function generatePDF(projectId) {
           fs.mkdirSync(path.join(__dirname, 'pdfs'));
         }
         
-        const browser = await puppeteer.launch();
+        const browser = await puppeteer.launch({
+          executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
+          args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
         const page = await browser.newPage();
         
         // Calculate dimensions based on cards per page
