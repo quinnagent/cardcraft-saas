@@ -778,8 +778,65 @@ app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
-    version: '1.0.0'
+    version: '1.0.0',
+    openrouterConfigured: !!process.env.OPENROUTER_API_KEY
   });
+});
+
+// Test OpenRouter
+app.get('/api/test-openrouter', async (req, res) => {
+  const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+  if (!OPENROUTER_API_KEY) {
+    return res.status(500).json({ error: 'OPENROUTER_API_KEY not set' });
+  }
+  
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'HTTP-Referer': 'https://cardcraft.app',
+        'X-Title': 'CardCraft'
+      },
+      body: JSON.stringify({
+        model: 'moonshotai/kimi-k2.5',
+        messages: [
+          { role: 'user', content: 'Say "OpenRouter is working"' }
+        ],
+        max_tokens: 50
+      })
+    });
+    
+    const responseText = await response.text();
+    
+    if (!response.ok) {
+      return res.status(500).json({ 
+        error: 'OpenRouter API error', 
+        status: response.status,
+        response: responseText.substring(0, 500)
+      });
+    }
+    
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      return res.status(500).json({ 
+        error: 'Invalid JSON response', 
+        response: responseText.substring(0, 500)
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: data.choices?.[0]?.message?.content || 'No message',
+      model: data.model,
+      usage: data.usage
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Serve PDFs statically
