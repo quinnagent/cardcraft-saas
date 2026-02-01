@@ -50,7 +50,7 @@ async function generateMessageWithAI(guest, tone) {
         'X-Title': 'CardCraft'
       },
       body: JSON.stringify({
-        model: 'moonshotai/kimi-k2.5',
+        model: 'anthropic/claude-3.5-sonnet',
         messages: [
           { role: 'system', content: 'You are a helpful assistant that writes personalized wedding thank you notes.' },
           { role: 'user', content: prompt }
@@ -79,12 +79,21 @@ async function generateMessageWithAI(guest, tone) {
       throw new Error('Invalid JSON response from OpenRouter');
     }
     
-    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+    if (!data.choices || !data.choices[0]) {
       console.error('Unexpected OpenRouter response structure:', JSON.stringify(data));
       throw new Error('Invalid response structure from OpenRouter');
     }
     
-    return data.choices[0].message.content.trim();
+    // Handle different response formats
+    const choice = data.choices[0];
+    const content = choice.message?.content || choice.text || choice.content;
+    
+    if (!content) {
+      console.error('No content in OpenRouter response:', JSON.stringify(choice));
+      throw new Error('Empty response from AI model');
+    }
+    
+    return content.trim();
   } catch (error) {
     console.error('OpenRouter fetch error:', error.message);
     throw error;
@@ -800,7 +809,7 @@ app.get('/api/test-openrouter', async (req, res) => {
         'X-Title': 'CardCraft'
       },
       body: JSON.stringify({
-        model: 'moonshotai/kimi-k2.5',
+        model: 'anthropic/claude-3.5-sonnet',
         messages: [
           { role: 'user', content: 'Say "OpenRouter is working"' }
         ],
@@ -828,9 +837,13 @@ app.get('/api/test-openrouter', async (req, res) => {
       });
     }
     
+    // Handle different response formats
+    const choice = data.choices?.[0];
+    const content = choice?.message?.content || choice?.text || choice?.content || 'No message';
+    
     res.json({
       success: true,
-      message: data.choices?.[0]?.message?.content || 'No message',
+      message: content,
       model: data.model,
       usage: data.usage
     });
