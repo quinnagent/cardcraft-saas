@@ -316,39 +316,34 @@ app.put('/api/cards/:id', authenticate, (req, res) => {
   });
 });
 
-// Generate AI messages for all cards in a project
-app.post('/api/projects/:id/generate-ai-messages', authenticate, async (req, res) => {
-  const { tone } = req.body;
+// Generate AI messages - no auth required for guest checkout
+app.post('/api/generate-ai-messages', async (req, res) => {
+  const { tone, guests } = req.body;
   
-  db.all('SELECT * FROM cards WHERE project_id = ?', [req.params.id], async (err, cards) => {
-    if (err) return res.status(500).json({ error: err.message });
-    
-    try {
-      const updatedCards = [];
-      for (const card of cards) {
-        const guest = { name: card.recipient_name, gift: card.gift };
-        const message = await generateMessageWithAI(guest, tone);
-        
-        // Update in database
-        await new Promise((resolve, reject) => {
-          db.run('UPDATE cards SET message = ? WHERE id = ?', [message, card.id], (err) => {
-            if (err) reject(err);
-            else resolve();
-          });
-        });
-        
-        updatedCards.push({ id: card.id, message });
-      }
-      
-      res.json({ success: true, cards: updatedCards });
-    } catch (error) {
-      console.error('AI generation failed:', error);
-      res.status(503).json({ 
-        error: 'AI service unavailable',
-        message: 'Failed to generate AI messages. Please try again later or write your own messages.'
+  if (!guests || !Array.isArray(guests) || guests.length === 0) {
+    return res.status(400).json({ error: 'No guests provided' });
+  }
+  
+  try {
+    const updatedCards = [];
+    for (const guest of guests) {
+      const message = await generateMessageWithAI(guest, tone);
+      updatedCards.push({ 
+        id: guest.id || Math.random().toString(36).substr(2, 9),
+        recipient_name: guest.name,
+        gift: guest.gift,
+        message 
       });
     }
-  });
+    
+    res.json({ success: true, cards: updatedCards });
+  } catch (error) {
+    console.error('AI generation failed:', error);
+    res.status(503).json({ 
+      error: 'AI service unavailable',
+      message: 'Failed to generate AI messages. Please try again later or write your own messages.'
+    });
+  }
 });
 
 // Stripe payment - authenticated

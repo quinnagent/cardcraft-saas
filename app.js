@@ -437,14 +437,20 @@ async function generateAIMessages() {
     generateBtn.disabled = true;
     
     try {
-        // Call backend API to generate AI messages
-        const response = await fetch(`${API_URL}/projects/${currentState.projectId || 1}/generate-ai-messages`, {
+        // Call backend API to generate AI messages (no auth required)
+        const response = await fetch(`${API_URL}/generate-ai-messages`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${currentState.token || 'demo-token'}`
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ tone: currentState.tone })
+            body: JSON.stringify({ 
+                tone: currentState.tone,
+                guests: currentState.guests.map((g, i) => ({
+                    id: i,
+                    name: g.name,
+                    gift: g.gift
+                }))
+            })
         });
         
         if (!response.ok) {
@@ -457,7 +463,7 @@ async function generateAIMessages() {
         // Update guests with AI-generated messages
         currentState.generatedMessages = data.cards;
         currentState.guests = data.cards.map(card => ({
-            name: card.recipient_name,
+            name: card.recipient_name || card.name,
             gift: card.gift,
             message: card.message
         }));
