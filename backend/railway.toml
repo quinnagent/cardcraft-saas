@@ -4,4 +4,3 @@ builder = "nixpacks"
 [deploy]
 startCommand = "node server.js"
 healthcheckPath = "/api/templates"
-restartPolicyType = "on_failure"
