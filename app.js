@@ -1,382 +1,364 @@
 // CardCraft Frontend JavaScript
 
-// Auto-detect API URL based on environment
-const API_URL = window.location.hostname === 'localhost' 
-  ? 'http://localhost:3000/api'
-  : 'https://cardcraft-api.up.railway.app/api'; // Change this to your deployed backend URL
+// State management
+let currentState = {
+    step: 1,
+    template: null,
+    guests: [],
+    messageType: null, // 'prewritten' or 'ai'
+    tone: null,
+    generatedMessages: [],
+    currentPlan: null
+};
 
-let currentProject = null;
-let currentCards = [];
-let selectedTemplate = null;
+// Sample guest data for demo
+const sampleGuests = [
+    { name: "Michael Johnson", gift: "Cash gift - $200", message: "" },
+    { name: "Janet and Stacey Miller", gift: "Target gift card - $50", message: "" },
+    { name: "Mr. and Mrs. Robert Smith", gift: "KitchenAid Stand Mixer", message: "" },
+    { name: "Emily and David Chen", gift: "Wine glasses set", message: "" },
+    { name: "Aunt Susan", gift: "Cash gift - $500", message: "" },
+    { name: "The Thompson Family", gift: "Instant Pot", message: "" },
+    { name: "Cousin Jake", gift: "Amazon gift card - $100", message: "" },
+    { name: "Grandma Betty", gift: "Handmade quilt", message: "" }
+];
 
-// Auth functions
-async function register(email, password) {
-  const res = await fetch(`${API_URL}/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password })
-  });
-  const data = await res.json();
-  if (data.token) {
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data.user));
-    return data.user;
-  }
-  throw new Error(data.error);
-}
+// Pre-written templates
+const prewrittenTemplates = {
+    "Cash gift": "Time has truly flown since our beautiful wedding day. Your generous gift has been such a blessing as we've settled into married life together. We have been putting it toward creating our home, and every time we make a purchase, we think of your kindness and generosity. Thank you so much for celebrating with us and for your thoughtful gift.",
+    "Gift card": "We were so happy you could join us on our special day! Your gift card was incredibly thoughtful and will help us as we build our life together. We've already started planning how to use it for our home. Thank you for your generosity and for being part of our celebration.",
+    "default": "What a wonderful celebration we had, and having you there made it even more special! Your thoughtful gift means so much to us as we begin this new chapter. We're so grateful for your presence and your generosity. Thank you from the bottom of our hearts!"
+};
 
-async function login(email, password) {
-  const res = await fetch(`${API_URL}/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password })
-  });
-  const data = await res.json();
-  if (data.token) {
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data.user));
-    return data.user;
-  }
-  throw new Error(data.error);
-}
-
-function logout() {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  window.location.reload();
-}
-
-function getAuthHeaders() {
-  const token = localStorage.getItem('token');
-  return token ? { 'Authorization': `Bearer ${token}` } : {};
-}
-
-// Project functions
-async function createProject(template) {
-  const res = await fetch(`${API_URL}/projects`, {
-    method: 'POST',
-    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ template })
-  });
-  return res.json();
-}
-
-async function uploadCSV(projectId, file) {
-  const formData = new FormData();
-  formData.append('file', file);
-  
-  const res = await fetch(`${API_URL}/projects/${projectId}/upload`, {
-    method: 'POST',
-    headers: getAuthHeaders(),
-    body: formData
-  });
-  return res.json();
-}
-
-async function getCards(projectId, preview = false) {
-  const res = await fetch(`${API_URL}/projects/${projectId}/cards?preview=${preview}`, {
-    headers: getAuthHeaders()
-  });
-  return res.json();
-}
-
-async function getCardCount(projectId) {
-  const res = await fetch(`${API_URL}/projects/${projectId}/cards/count`, {
-    headers: getAuthHeaders()
-  });
-  return res.json();
-}
-
-async function updateCard(cardId, message) {
-  const res = await fetch(`${API_URL}/cards/${cardId}`, {
-    method: 'PUT',
-    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message })
-  });
-  return res.json();
-}
-
-// Payment functions
-async function createPayment(projectId, plan) {
-  const res = await fetch(`${API_URL}/create-payment`, {
-    method: 'POST',
-    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ projectId, plan })
-  });
-  return res.json();
-}
-
-async function confirmPayment(projectId, paymentIntentId) {
-  const res = await fetch(`${API_URL}/confirm-payment`, {
-    method: 'POST',
-    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ projectId, paymentIntentId })
-  });
-  return res.json();
-}
-
-// UI Functions
-function showAuthModal() {
-  document.getElementById('authModal').classList.add('active');
-}
-
-function closeAuthModal() {
-  document.getElementById('authModal').classList.remove('active');
-}
-
-function updateUIForAuth() {
-  const user = JSON.parse(localStorage.getItem('user') || 'null');
-  const authSection = document.getElementById('authSection');
-  
-  if (user) {
-    authSection.innerHTML = `
-      <span>Hello, ${user.email}</span>
-      <button class="btn btn-outline" onclick="logout()">Logout</button>
-    `;
-  } else {
-    authSection.innerHTML = `
-      <button class="btn btn-outline" onclick="showAuthModal()">Login</button>
-    `;
-  }
-}
-
-// Template selection
-document.querySelectorAll('.template-card').forEach(card => {
-  card.addEventListener('click', async () => {
-    if (!localStorage.getItem('token')) {
-      showAuthModal();
-      return;
-    }
+// AI message generator (mock - replace with actual API call)
+async function generateAIMessage(guest, tone) {
+    // In production, this would call your backend API which uses OpenAI/Anthropic
+    // For demo, return mock messages based on tone
+    const toneMessages = {
+        warm: `Dear ${guest.name},\n\nWe can't thank you enough for being part of our special day and for your incredibly thoughtful ${guest.gift.toLowerCase()}. It means the world to us that you took the time to celebrate with us, and your generosity has touched our hearts deeply. We're so grateful to have you in our lives!\n\nWith love and appreciation,\nCollin and Annika`,
+        
+        formal: `Dear ${guest.name},\n\nWe wish to express our sincere gratitude for your presence at our wedding and for your generous gift of ${guest.gift.toLowerCase()}. Your thoughtfulness is deeply appreciated as we begin our married life together. We are honored to have shared this special occasion with you.\n\nWith warm regards,\nCollin and Annika`,
+        
+        casual: `Hey ${guest.name.split(' ')[0]}!\n\nThanks so much for coming to our wedding and for the awesome ${guest.gift.toLowerCase()}! We had such a blast celebrating with you. Your gift is going to be so useful as we set up our new place together. Really appreciate you being there!\n\nThanks again,\nCollin and Annika`,
+        
+        poetic: `Dearest ${guest.name},\n\nLike stars that light the evening sky,\nYour presence made our wedding shine.\nYour gift of ${guest.gift.toLowerCase()}, so thoughtful and kind,\nFills our hearts with joy divine.\n\nThank you for sharing in our love's sweet story,\nAnd for being part of our forever.\n\nWith eternal gratitude,\nCollin and Annika`
+    };
     
-    document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
-    card.classList.add('selected');
-    selectedTemplate = card.dataset.template;
-    
-    // Create project
-    const project = await createProject(selectedTemplate);
-    currentProject = project;
-    
-    // Show upload section
-    document.getElementById('uploadSection').scrollIntoView({ behavior: 'smooth' });
-  });
-});
-
-// File upload
-const uploadBox = document.getElementById('uploadBox');
-const fileInput = document.getElementById('fileInput');
-
-uploadBox.addEventListener('dragover', (e) => {
-  e.preventDefault();
-  uploadBox.classList.add('dragover');
-});
-
-uploadBox.addEventListener('dragleave', () => {
-  uploadBox.classList.remove('dragover');
-});
-
-uploadBox.addEventListener('drop', async (e) => {
-  e.preventDefault();
-  uploadBox.classList.remove('dragover');
-  
-  if (!currentProject) {
-    alert('Please select a template first');
-    return;
-  }
-  
-  const files = e.dataTransfer.files;
-  if (files.length) await handleUpload(files[0]);
-});
-
-fileInput.addEventListener('change', async (e) => {
-  if (!currentProject) {
-    alert('Please select a template first');
-    return;
-  }
-  
-  if (e.target.files.length) await handleUpload(e.target.files[0]);
-});
-
-async function handleUpload(file) {
-  uploadBox.innerHTML = '<p>Uploading...</p>';
-  
-  try {
-    const result = await uploadCSV(currentProject.id, file);
-    uploadBox.innerHTML = `<p>✓ Uploaded ${result.count} cards!</p>`;
-    
-    // Get total count
-    const countResult = await getCardCount(currentProject.id);
-    currentProject.totalCards = countResult.total;
-    
-    // Load only 4 preview cards
-    const previewResult = await getCards(currentProject.id, true);
-    currentCards = previewResult.cards;
-    currentProject.isPreview = previewResult.isPreview;
-    currentProject.isPaid = previewResult.isPaid;
-    
-    showPreview();
-  } catch (err) {
-    uploadBox.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
-  }
+    return toneMessages[tone] || toneMessages.warm;
 }
-
-function showPreview() {
-  document.getElementById('previewSection').classList.add('active');
-  document.getElementById('previewSection').scrollIntoView({ behavior: 'smooth' });
-  
-  renderCard(0);
-  updateCardCounter();
-}
-
-function renderCard(index) {
-  const card = currentCards[index];
-  if (!card) return;
-
-  const cardIndexInput = document.getElementById('cardIndex');
-  const recipientEl = document.getElementById('recipientName');
-  const messageEl = document.getElementById('cardMessage');
-  const giftEl = document.getElementById('giftNote');
-
-  if (cardIndexInput) cardIndexInput.value = index;
-  if (recipientEl) recipientEl.textContent = `Dear ${card.recipient_name},`;
-  if (messageEl) messageEl.value = card.message;
-  if (giftEl) giftEl.textContent = card.gift ? `Gift: ${card.gift}` : '';
-}
-
-function updateCardCounter() {
-  const index = parseInt(document.getElementById('cardIndex')?.value || 0);
-  const counterEl = document.getElementById('cardCounter');
-  const upgradeEl = document.getElementById('upgradePrompt');
-
-  if (!counterEl) return;
-
-  if (currentProject.isPreview) {
-    counterEl.textContent = `Preview: Card ${index + 1} of ${currentCards.length} (4 of ${currentProject.totalCards} total)`;
-
-    // Show upgrade prompt
-    if (upgradeEl) {
-      upgradeEl.style.display = 'block';
-      upgradeEl.innerHTML = `
-        <div style="background: #f0ece5; padding: 20px; border-radius: 8px; margin-top: 20px; text-align: center;">
-          <p style="margin-bottom: 15px; font-weight: 500;">You're viewing 4 of ${currentProject.totalCards} cards</p>
-          <p style="margin-bottom: 15px; color: #666; font-size: 14px;">Upgrade to unlock all cards and download your print-ready PDF</p>
-          <button class="btn" onclick="scrollToPricing()" style="background: var(--primary); color: white; padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">Unlock All Cards - $39</button>
-        </div>
-      `;
-    }
-  } else {
-    counterEl.textContent = `Card ${index + 1} of ${currentCards.length}`;
-    if (upgradeEl) upgradeEl.style.display = 'none';
-  }
-}
-
-document.getElementById('prevCard')?.addEventListener('click', () => {
-  const index = parseInt(document.getElementById('cardIndex').value || 0);
-  if (index > 0) {
-    saveCurrentCard();
-    renderCard(index - 1);
-    updateCardCounter();
-  }
-});
-
-document.getElementById('nextCard')?.addEventListener('click', () => {
-  const index = parseInt(document.getElementById('cardIndex').value || 0);
-  if (index < currentCards.length - 1) {
-    saveCurrentCard();
-    renderCard(index + 1);
-    updateCardCounter();
-  }
-});
-
-async function saveCurrentCard() {
-  const index = parseInt(document.getElementById('cardIndex').value || 0);
-  const message = document.getElementById('cardMessage').value;
-  const card = currentCards[index];
-  
-  await updateCard(card.id, message);
-  currentCards[index].message = message;
-}
-
-// Payment
-document.querySelectorAll('.pricing-card button').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    if (!currentProject) {
-      alert('Please create a project first');
-      return;
-    }
-    
-    const plan = btn.dataset.plan;
-    showPaymentModal(plan);
-  });
-});
-
-function showPaymentModal(plan) {
-  document.getElementById('paymentModal').classList.add('active');
-  document.getElementById('selectedPlan').textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
-}
-
-function closePaymentModal() {
-  document.getElementById('paymentModal').classList.remove('active');
-}
-
-function scrollToPricing() {
-  document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
-}
-
-// Initialize Stripe Elements
-let stripe, cardElement;
-
-async function initStripe() {
-  stripe = Stripe('pk_test_your_publishable_key');
-  const elements = stripe.elements();
-  cardElement = elements.create('card');
-  cardElement.mount('#cardElement');
-}
-
-document.getElementById('paymentForm')?.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  
-  const plan = document.getElementById('selectedPlan').textContent.toLowerCase();
-  
-  try {
-    // Create payment intent
-    const { clientSecret } = await createPayment(currentProject.id, plan);
-    
-    // Confirm card payment
-    const result = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: { card: cardElement }
-    });
-    
-    if (result.error) {
-      document.getElementById('paymentError').textContent = result.error.message;
-    } else {
-      // Payment successful, generate PDF
-      const confirm = await confirmPayment(currentProject.id, result.paymentIntent.id);
-      
-      if (confirm.success) {
-        closePaymentModal();
-        currentProject.isPaid = true;
-        currentProject.isPreview = false;
-
-        // Reload all cards (not just preview)
-        const allCardsResult = await getCards(currentProject.id, false);
-        currentCards = allCardsResult.cards;
-
-        // Update UI
-        updateCardCounter();
-        renderCard(0);
-
-        // Show download section
-        document.getElementById('downloadSection').classList.add('active');
-        document.getElementById('downloadLink').href = `${API_URL}/download/${currentProject.id}`;
-      }
-    }
-  } catch (err) {
-    document.getElementById('paymentError').textContent = err.message;
-  }
-});
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-  updateUIForAuth();
-  initStripe();
+    initTemplateSelection();
+    initUpload();
+    updateProgressBar();
 });
+
+// Template Selection
+function initTemplateSelection() {
+    document.querySelectorAll('.template-card').forEach(card => {
+        card.addEventListener('click', () => {
+            document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            currentState.template = card.dataset.template;
+            document.getElementById('templateContinue').disabled = false;
+            updateProgressBar();
+        });
+    });
+}
+
+// Show/Hide Sections
+function showSection(sectionId) {
+    // Hide all sections except hero and steps
+    document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+    });
+    
+    // Show requested section
+    const section = document.getElementById(sectionId);
+    if (section) {
+        section.classList.add('active');
+        section.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Show progress bar after template selection
+    if (sectionId !== 'templates') {
+        document.getElementById('progressBar').style.display = 'block';
+    }
+    
+    // Update step
+    updateStepFromSection(sectionId);
+}
+
+function updateStepFromSection(sectionId) {
+    const stepMap = {
+        'templates': 1,
+        'upload': 2,
+        'messageType': 3,
+        'aiGeneration': 3,
+        'simpleEdit': 3,
+        'previewExamples': 4,
+        'pricing': 5
+    };
+    
+    if (stepMap[sectionId]) {
+        currentState.step = stepMap[sectionId];
+        updateProgressBar();
+    }
+}
+
+function updateProgressBar() {
+    document.querySelectorAll('.progress-step').forEach(step => {
+        const stepNum = parseInt(step.dataset.step);
+        step.classList.remove('active', 'completed');
+        
+        if (stepNum === currentState.step) {
+            step.classList.add('active');
+        } else if (stepNum < currentState.step) {
+            step.classList.add('completed');
+        }
+    });
+}
+
+function startCreating() {
+    showSection('templates');
+}
+
+// File Upload
+function initUpload() {
+    const uploadBox = document.getElementById('uploadBox');
+    const fileInput = document.getElementById('fileInput');
+
+    uploadBox.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadBox.classList.add('dragover');
+    });
+
+    uploadBox.addEventListener('dragleave', () => {
+        uploadBox.classList.remove('dragover');
+    });
+
+    uploadBox.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadBox.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length) handleFile(files[0]);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length) handleFile(e.target.files[0]);
+    });
+}
+
+function handleFile(file) {
+    const uploadBox = document.getElementById('uploadBox');
+    uploadBox.innerHTML = `
+        <div class="upload-icon">✓</div>
+        <h3>File uploaded successfully!</h3>
+        <p>${file.name}</p>
+        <p style="color: #666; font-size: 0.9rem; margin-top: 1rem;">Processing ${sampleGuests.length} guests...</p>
+    `;
+    
+    // Simulate processing delay
+    setTimeout(() => {
+        currentState.guests = [...sampleGuests];
+        currentState.step = 3;
+        updateProgressBar();
+        showSection('messageType');
+    }, 1500);
+}
+
+// Message Type Selection
+function selectMessageType(type) {
+    currentState.messageType = type;
+    
+    document.querySelectorAll('.message-option').forEach(opt => {
+        opt.classList.remove('selected');
+    });
+    event.currentTarget.classList.add('selected');
+    
+    setTimeout(() => {
+        if (type === 'prewritten') {
+            // Generate pre-written messages and go to preview
+            generatePrewrittenMessages();
+            showSection('previewExamples');
+        } else {
+            // Show AI generation options
+            showSection('aiGeneration');
+        }
+    }, 300);
+}
+
+function generatePrewrittenMessages() {
+    currentState.guests = currentState.guests.map(guest => {
+        const giftType = guest.gift.toLowerCase().includes('cash') ? 'Cash gift' :
+                        guest.gift.toLowerCase().includes('card') ? 'Gift card' : 'default';
+        return {
+            ...guest,
+            message: prewrittenTemplates[giftType] || prewrittenTemplates.default
+        };
+    });
+}
+
+// AI Generation
+function selectTone(tone) {
+    currentState.tone = tone;
+    
+    document.querySelectorAll('.tone-option').forEach(opt => {
+        opt.classList.remove('selected');
+    });
+    event.currentTarget.classList.add('selected');
+    
+    document.getElementById('generateBtn').disabled = false;
+}
+
+async function generateAIMessages() {
+    if (!currentState.tone) return;
+    
+    const loadingDiv = document.getElementById('aiLoading');
+    const generateBtn = document.getElementById('generateBtn');
+    
+    loadingDiv.classList.add('active');
+    generateBtn.disabled = true;
+    
+    // Simulate AI generation
+    const generatedMessages = [];
+    for (let i = 0; i < currentState.guests.length; i++) {
+        const message = await generateAIMessage(currentState.guests[i], currentState.tone);
+        generatedMessages.push({
+            ...currentState.guests[i],
+            message: message
+        });
+        
+        // Add small delay for realism
+        await new Promise(resolve => setTimeout(resolve, 200));
+    }
+    
+    currentState.generatedMessages = generatedMessages;
+    currentState.guests = generatedMessages;
+    
+    loadingDiv.classList.remove('active');
+    
+    // Populate edit list
+    populateEditList();
+    
+    // Go to simple edit view
+    showSection('simpleEdit');
+}
+
+// Simple Edit List
+function populateEditList() {
+    const container = document.getElementById('editListContainer');
+    
+    container.innerHTML = currentState.guests.map((guest, index) => `
+        <div class="edit-list-item">
+            <div class="edit-list-header">
+                <span class="edit-list-recipient">${guest.name}</span>
+                <span class="edit-list-gift">${guest.gift}</span>
+            </div>
+            <textarea 
+                class="edit-list-textarea" 
+                id="edit-${index}"
+                onchange="updateMessage(${index}, this.value)"
+            >${guest.message}</textarea>
+        </div>
+    `).join('');
+}
+
+function updateMessage(index, newMessage) {
+    currentState.guests[index].message = newMessage;
+}
+
+// Preview Examples
+function showPreviewExamples() {
+    const grid = document.getElementById('previewExamplesGrid');
+    const totalCount = document.getElementById('totalCardCount');
+    
+    // Show first 4 guests as examples
+    const examples = currentState.guests.slice(0, 4);
+    
+    grid.innerHTML = examples.map(guest => `
+        <div class="preview-example-card">
+            <h4>Dear ${guest.name}</h4>
+            <div class="gift-tag">${guest.gift}</div>
+            <div class="message-preview">"${guest.message.substring(0, 150)}..."</div>
+        </div>
+    `).join('');
+    
+    totalCount.textContent = currentState.guests.length;
+    
+    currentState.step = 4;
+    updateProgressBar();
+    showSection('previewExamples');
+}
+
+// Payment
+function openPayment(plan) {
+    currentState.currentPlan = plan;
+    const prices = { starter: 19, premium: 39, unlimited: 79 };
+    document.getElementById('payAmount').textContent = prices[plan];
+    document.getElementById('paymentModal').classList.add('active');
+}
+
+function closePayment() {
+    document.getElementById('paymentModal').classList.remove('active');
+}
+
+function closePaymentModal() {
+    closePayment();
+}
+
+// Payment form submission
+document.getElementById('paymentForm')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    // Simulate payment processing
+    const btn = e.target.querySelector('.pay-btn');
+    const originalText = btn.textContent;
+    btn.textContent = 'Processing...';
+    btn.disabled = true;
+    
+    setTimeout(() => {
+        alert('Payment successful! Your cards are ready for download. Check your email for the download link.');
+        closePayment();
+        btn.textContent = originalText;
+        btn.disabled = false;
+    }, 2000);
+});
+
+// Close modal on outside click
+document.getElementById('paymentModal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'paymentModal') closePayment();
+});
+
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+});
+
+// API Integration functions (for when backend is ready)
+async function createProject(template) {
+    // Call backend API
+    console.log('Creating project with template:', template);
+}
+
+async function uploadCSV(projectId, file) {
+    // Call backend API
+    console.log('Uploading CSV for project:', projectId);
+}
+
+async function saveProject() {
+    // Save current state to backend
+    console.log('Saving project:', currentState);
+}
+
+// Export for testing
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { currentState, generateAIMessage };
+}

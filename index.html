@@ -19,6 +19,7 @@
             --light: #f8f6f3;
             --white: #ffffff;
             --text: #3d3d3d;
+            --success: #4a7c59;
         }
         
         body {
@@ -98,6 +99,15 @@
             background: var(--primary);
             color: var(--white);
         }
+
+        .btn-secondary {
+            background: var(--secondary);
+        }
+
+        .btn-large {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+        }
         
         /* Hero Section */
         .hero {
@@ -127,7 +137,7 @@
             margin-top: 2rem;
         }
         
-        /* How It Works */
+        /* Steps Section */
         .steps {
             padding: 5rem 5%;
             background: var(--white);
@@ -171,10 +181,19 @@
             color: var(--primary);
             margin-bottom: 0.5rem;
         }
+
+        /* Section Base */
+        .section {
+            padding: 5rem 5%;
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
         
         /* Templates Section */
         .templates {
-            padding: 5rem 5%;
             background: var(--light);
         }
         
@@ -229,7 +248,6 @@
             position: relative;
         }
         
-        /* Mini card preview styles */
         .mini-card {
             width: 100%;
             height: 100%;
@@ -243,57 +261,22 @@
             text-align: center;
         }
         
-        .mini-card.classic {
-            border: 2px solid #c9b8a8;
-        }
-        
-        .mini-card.modern {
-            border: none;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
+        .mini-card.classic { border: 2px solid #c9b8a8; }
+        .mini-card.modern { border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .mini-card.elegant::before {
             content: '';
             position: absolute;
-            top: 4px;
-            left: 4px;
-            right: 4px;
-            bottom: 4px;
+            top: 4px; left: 4px; right: 4px; bottom: 4px;
             border: 1px solid #d4c5b5;
             pointer-events: none;
         }
-        
-        .mini-card.rustic {
-            border: 1px dashed #b8a090;
-        }
-        
-        .mini-card.floral {
-            background: linear-gradient(135deg, #fff9f7 0%, #fdf5f0 100%);
-        }
-        
-        .mini-card.minimal {
-            border: 1px solid #e5e5e5;
-        }
-        
-        .mini-card.vintage {
-            background: #faf8f5;
-            border: 1px solid #c9b8a8;
-        }
-        
-        .mini-card.romantic {
-            background: linear-gradient(180deg, #fff5f2 0%, #f9eae5 100%);
-            border: 1px solid #e8d4cc;
-        }
-        
-        .mini-card.botanical {
-            background: #f5f8f5;
-            border: 1px solid #b8c4b8;
-        }
-        
-        .mini-card.luxe {
-            background: linear-gradient(135deg, #faf9f7 0%, #f0ece5 100%);
-            border: 2px solid #b8a090;
-        }
+        .mini-card.rustic { border: 1px dashed #b8a090; }
+        .mini-card.floral { background: linear-gradient(135deg, #fff9f7 0%, #fdf5f0 100%); }
+        .mini-card.minimal { border: 1px solid #e5e5e5; }
+        .mini-card.vintage { background: #faf8f5; border: 1px solid #c9b8a8; }
+        .mini-card.romantic { background: linear-gradient(180deg, #fff5f2 0%, #f9eae5 100%); border: 1px solid #e8d4cc; }
+        .mini-card.botanical { background: #f5f8f5; border: 1px solid #b8c4b8; }
+        .mini-card.luxe { background: linear-gradient(135deg, #faf9f7 0%, #f0ece5 100%); border: 2px solid #b8a090; }
         
         .mini-header {
             font-family: 'Playfair Display', serif;
@@ -344,7 +327,6 @@
         
         /* Upload Section */
         .upload-section {
-            padding: 5rem 5%;
             background: var(--white);
         }
         
@@ -398,21 +380,6 @@
             display: none;
         }
         
-        .upload-btn {
-            background: var(--primary);
-            color: white;
-            padding: 0.875rem 2rem;
-            border: none;
-            border-radius: 4px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .upload-btn:hover {
-            background: var(--secondary);
-        }
-        
         .upload-template {
             margin-top: 2rem;
             padding: 1.5rem;
@@ -436,45 +403,313 @@
             color: #555;
             border: 1px solid #e0e0e0;
         }
-        
-        /* Preview Section */
-        .preview-section {
-            padding: 5rem 5%;
+
+        /* Message Type Selection */
+        .message-type-section {
             background: var(--light);
-            display: none;
         }
-        
-        .preview-section.active {
-            display: block;
-        }
-        
-        .preview-section h2 {
+
+        .message-type-section h2 {
             text-align: center;
             font-size: 2.5rem;
             color: var(--primary);
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
         }
-        
-        .preview-controls {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
+
+        .message-type-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 3rem;
         }
-        
-        .preview-card {
-            max-width: 500px;
+
+        .message-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            max-width: 800px;
             margin: 0 auto;
-            background: white;
-            padding: 3rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            min-height: 600px;
         }
-        
+
+        .message-option {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 2.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .message-option:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-color: var(--accent);
+        }
+
+        .message-option.selected {
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px var(--accent);
+        }
+
+        .message-option-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .message-option h3 {
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .message-option p {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .message-option-features {
+            list-style: none;
+            text-align: left;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .message-option-features li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .message-option-features li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        /* AI Generation Section */
+        .ai-generation-section {
+            background: var(--white);
+        }
+
+        .ai-generation-section h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .ai-generation-container {
+            max-width: 600px;
+            margin: 3rem auto;
+            text-align: center;
+        }
+
+        .ai-tone-selector {
+            margin: 2rem 0;
+        }
+
+        .ai-tone-selector label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+            color: var(--primary);
+        }
+
+        .tone-options {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .tone-option {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--accent);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: var(--white);
+        }
+
+        .tone-option:hover, .tone-option.selected {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: var(--white);
+        }
+
+        .ai-loading {
+            display: none;
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .ai-loading.active {
+            display: block;
+        }
+
+        .ai-loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--accent);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Simple Edit List */
+        .simple-edit-section {
+            background: var(--light);
+        }
+
+        .simple-edit-section h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .simple-edit-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .simple-edit-container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .edit-list-item {
+            border-bottom: 1px solid #eee;
+            padding: 1.5rem 0;
+        }
+
+        .edit-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .edit-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .edit-list-recipient {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .edit-list-gift {
+            font-size: 0.85rem;
+            color: #888;
+            background: var(--light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+        }
+
+        .edit-list-textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .edit-list-textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+
+        /* Preview Examples Section */
+        .preview-examples-section {
+            background: var(--white);
+        }
+
+        .preview-examples-section h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .preview-examples-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 3rem;
+        }
+
+        .preview-examples-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            max-width: 900px;
+            margin: 0 auto 3rem;
+        }
+
+        .preview-example-card {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .preview-example-card h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .preview-example-card .gift-tag {
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 1rem;
+        }
+
+        .preview-example-card .message-preview {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #555;
+            font-style: italic;
+        }
+
+        .preview-locked {
+            text-align: center;
+            padding: 3rem;
+            background: linear-gradient(135deg, var(--light) 0%, #f0ece5 100%);
+            border-radius: 12px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .preview-locked h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .preview-locked p {
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+
         /* Pricing Section */
         .pricing {
-            padding: 5rem 5%;
-            background: var(--white);
+            background: var(--light);
         }
         
         .pricing h2 {
@@ -493,7 +728,7 @@
         }
         
         .pricing-card {
-            background: var(--light);
+            background: var(--white);
             padding: 2.5rem;
             border-radius: 12px;
             text-align: center;
@@ -556,6 +791,63 @@
         
         .pricing-card.featured .pricing-features li {
             border-bottom-color: rgba(255,255,255,0.2);
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            background: var(--white);
+            padding: 1.5rem 5%;
+            border-bottom: 1px solid #eee;
+            position: sticky;
+            top: 60px;
+            z-index: 50;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .progress-step.active {
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .progress-step.completed {
+            color: var(--success);
+        }
+
+        .progress-step-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .progress-step.active .progress-step-number {
+            background: var(--primary);
+            color: white;
+        }
+
+        .progress-step.completed .progress-step-number {
+            background: var(--success);
+            color: white;
         }
         
         /* Payment Modal */
@@ -667,7 +959,7 @@
         
         /* Responsive */
         @media (max-width: 1024px) {
-            .template-grid {
+            .template-grid, .preview-examples-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
             
@@ -675,7 +967,7 @@
                 grid-template-columns: repeat(2, 1fr);
             }
             
-            .pricing-grid {
+            .pricing-grid, .message-options {
                 grid-template-columns: 1fr;
                 max-width: 400px;
             }
@@ -690,7 +982,7 @@
                 font-size: 2.5rem;
             }
             
-            .template-grid {
+            .template-grid, .preview-examples-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
             
@@ -700,6 +992,10 @@
             
             .nav-links {
                 display: none;
+            }
+
+            .preview-examples-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -716,13 +1012,39 @@
         </div>
     </nav>
 
+    <!-- Progress Bar (hidden initially) -->
+    <div class="progress-bar" id="progressBar" style="display: none;">
+        <div class="progress-steps">
+            <div class="progress-step active" data-step="1">
+                <span class="progress-step-number">1</span>
+                <span>Template</span>
+            </div>
+            <div class="progress-step" data-step="2">
+                <span class="progress-step-number">2</span>
+                <span>Upload</span>
+            </div>
+            <div class="progress-step" data-step="3">
+                <span class="progress-step-number">3</span>
+                <span>Messages</span>
+            </div>
+            <div class="progress-step" data-step="4">
+                <span class="progress-step-number">4</span>
+                <span>Preview</span>
+            </div>
+            <div class="progress-step" data-step="5">
+                <span class="progress-step-number">5</span>
+                <span>Payment</span>
+            </div>
+        </div>
+    </div>
+
     <!-- Hero Section -->
-    <section class="hero">
+    <section class="hero" id="hero">
         <h1>Wedding Thank You Cards<br>Made Beautifully Simple</h1>
         <p>Choose from 10 elegant templates, upload your guest list, and generate personalized thank you cards in minutes. Print at home or send to a professional printer.</p>
         <div class="hero-cta">
-            <a href="#templates" class="btn">Browse Templates</a>
-            <a href="#upload" class="btn btn-outline">Start Creating</a>
+            <a href="#templates" class="btn" onclick="showSection('templates')">Browse Templates</a>
+            <a href="#upload" class="btn btn-outline" onclick="startCreating()">Start Creating</a>
         </div>
     </section>
 
@@ -738,12 +1060,12 @@
             <div class="step">
                 <div class="step-number">2</div>
                 <h3>Upload List</h3>
-                <p>Upload a CSV with guest names and gifts. We'll help you personalize each message</p>
+                <p>Upload a CSV with guest names and gifts. Choose pre-written or AI-assisted messages</p>
             </div>
             <div class="step">
                 <div class="step-number">3</div>
-                <h3>Preview</h3>
-                <p>Review every card, make edits, and see exactly how they'll look when printed</p>
+                <h3>Personalize</h3>
+                <p>Edit your messages with our simple list view or preview the full cards</p>
             </div>
             <div class="step">
                 <div class="step-number">4</div>
@@ -754,7 +1076,7 @@
     </section>
 
     <!-- Templates Section -->
-    <section class="templates" id="templates">
+    <section class="section templates active" id="templates">
         <h2>Choose Your Style</h2>
         <p class="templates-subtitle">10 elegant designs, all customizable</p>
         
@@ -899,18 +1221,22 @@
                 </div>
             </div>
         </div>
+
+        <div style="text-align: center; margin-top: 3rem;">
+            <button class="btn btn-large" id="templateContinue" onclick="showSection('upload')" disabled>Continue to Upload</button>
+        </div>
     </section>
 
     <!-- Upload Section -->
-    <section class="upload-section" id="upload">
+    <section class="section upload-section" id="upload">
         <h2>Upload Your Guest List</h2>
         <div class="upload-container">
             <div class="upload-box" id="uploadBox">
                 <div class="upload-icon">📄</div>
                 <h3>Drop your CSV file here</h3>
                 <p>or click to browse from your computer</p>
-                <input type="file" id="fileInput" class="file-input" accept=".csv,.xlsx,.xls">
-                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Select File</button>
+                <input type="file" id="fileInput" class="file-input" accept=".csv">
+                <button class="btn" onclick="document.getElementById('fileInput').click()">Select File</button>
             </div>
             
             <div class="upload-template">
@@ -920,25 +1246,96 @@
         </div>
     </section>
 
-    <!-- Preview Section -->
-    <section class="preview-section" id="preview">
-        <h2>Preview Your Cards</h2>
-        <div class="preview-controls">
-            <button class="btn btn-outline" id="prevCard">← Previous</button>
-            <span id="cardCounter">Card 1 of 45</span>
-            <button class="btn btn-outline" id="nextCard">Next →</button>
+    <!-- Message Type Selection -->
+    <section class="section message-type-section" id="messageType">
+        <h2>Choose Your Message Style</h2>
+        <p class="message-type-subtitle">How would you like to create your thank you messages?</p>
+        
+        <div class="message-options">
+            <div class="message-option" onclick="selectMessageType('prewritten')">
+                <div class="message-option-icon">✍️</div>
+                <h3>Pre-Written Messages</h3>
+                <p>Use our professionally crafted thank you templates. Perfect if you want elegant, ready-to-use messages.</p>
+                <ul class="message-option-features">
+                    <li>Professionally written templates</li>
+                    <li>Personalized with guest names & gifts</li>
+                    <li>Quick and easy setup</li>
+                    <li>Edit any message before printing</li>
+                </ul>
+            </div>
+            
+            <div class="message-option" onclick="selectMessageType('ai')">
+                <div class="message-option-icon">🤖</div>
+                <h3>AI-Assisted Messages</h3>
+                <p>Let AI generate unique, personalized messages for each guest based on their gift and your style.</p>
+                <ul class="message-option-features">
+                    <li>Unique message for each guest</li>
+                    <li>Choose your tone (warm, formal, funny)</li>
+                    <li>References specific gifts naturally</li>
+                    <li>Edit all messages in simple list view</li>
+                </ul>
+            </div>
         </div>
-        <div id="upgradePrompt" style="display: none;"></div>
-        <div class="preview-card" id="previewCard">
-            <input type="hidden" id="cardIndex" value="0">
-            <div id="recipientName" style="font-size: 1rem; margin-bottom: 1rem; text-align: center; font-weight: 500;">Dear Guest,</div>
-            <textarea id="cardMessage" style="width: 100%; min-height: 200px; padding: 1rem; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; font-size: 0.95rem; line-height: 1.6; resize: vertical;"></textarea>
-            <div id="giftNote" style="font-size: 0.875rem; color: #666; margin-top: 0.5rem; text-align: center;"></div>
+    </section>
+
+    <!-- AI Generation Section -->
+    <section class="section ai-generation-section" id="aiGeneration">
+        <h2>Generate AI Messages</h2>
+        <div class="ai-generation-container">
+            <p>Choose the tone for your thank you messages. Our AI will create personalized messages for each guest.</p>
+            
+            <div class="ai-tone-selector">
+                <label>Select Message Tone:</label>
+                <div class="tone-options">
+                    <div class="tone-option" onclick="selectTone('warm')">Warm & Heartfelt</div>
+                    <div class="tone-option" onclick="selectTone('formal')">Formal & Elegant</div>
+                    <div class="tone-option" onclick="selectTone('casual')">Casual & Friendly</div>
+                    <div class="tone-option" onclick="selectTone('poetic')">Poetic & Romantic</div>
+                </div>
+            </div>
+            
+            <button class="btn btn-large" id="generateBtn" onclick="generateAIMessages()" disabled>Generate Messages</button>
+            
+            <div class="ai-loading" id="aiLoading">
+                <div class="ai-loading-spinner"></div>
+                <p>Creating personalized messages for your guests...</p>
+                <p style="font-size: 0.9rem; color: #888; margin-top: 0.5rem;">This may take a moment</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Simple Edit List Section (for AI messages) -->
+    <section class="section simple-edit-section" id="simpleEdit">
+        <h2>Edit Your Messages</h2>
+        <p class="simple-edit-subtitle">Review and customize each message before previewing your cards</p>
+        
+        <div class="simple-edit-container" id="editListContainer">
+            <!-- Edit items will be inserted here -->
+        </div>
+        
+        <div style="text-align: center; margin-top: 2rem;">
+            <button class="btn btn-large" onclick="showPreviewExamples()">Continue to Preview</button>
+        </div>
+    </section>
+
+    <!-- Preview Examples Section (before payment) -->
+    <section class="section preview-examples-section" id="previewExamples">
+        <h2>Preview Your Cards</h2>
+        <p class="preview-examples-subtitle">Here are 4 personalized examples from your collection</p>
+        
+        <div class="preview-examples-grid" id="previewExamplesGrid">
+            <!-- Preview cards will be inserted here -->
+        </div>
+        
+        <div class="preview-locked">
+            <h3>Ready to see all your cards?</h3>
+            <p>You have <strong id="totalCardCount">45</strong> personalized cards ready to download. Unlock them now!</p>
+            <button class="btn btn-large" onclick="showSection('pricing')" style="margin-top: 1rem;">Unlock All Cards</button>
         </div>
     </section>
 
     <!-- Pricing Section -->
-    <section class="pricing" id="pricing">
+    <section class="section pricing" id="pricing">
         <h2>Simple Pricing</h2>
         <div class="pricing-grid">
             <div class="pricing-card">
@@ -1023,100 +1420,6 @@
         <p>&copy; 2026 CardCraft. Beautiful wedding stationery made simple.</p>
     </footer>
 
-    <script>
-        // Template Selection
-        let selectedTemplate = null;
-        document.querySelectorAll('.template-card').forEach(card => {
-            card.addEventListener('click', () => {
-                document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
-                card.classList.add('selected');
-                selectedTemplate = card.dataset.template;
-            });
-        });
-
-        // File Upload
-        const uploadBox = document.getElementById('uploadBox');
-        const fileInput = document.getElementById('fileInput');
-
-        uploadBox.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadBox.classList.add('dragover');
-        });
-
-        uploadBox.addEventListener('dragleave', () => {
-            uploadBox.classList.remove('dragover');
-        });
-
-        uploadBox.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadBox.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length) handleFile(files[0]);
-        });
-
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length) handleFile(e.target.files[0]);
-        });
-
-        function handleFile(file) {
-            // Simulate processing
-            uploadBox.innerHTML = `
-                <div class="upload-icon">✓</div>
-                <h3>File uploaded successfully!</h3>
-                <p>${file.name}</p>
-                <button class="upload-btn" onclick="showPreview()">Preview Cards</button>
-            `;
-        }
-
-        function showPreview() {
-            document.getElementById('preview').classList.add('active');
-            document.getElementById('preview').scrollIntoView({ behavior: 'smooth' });
-            
-            // Load sample preview
-            document.getElementById('previewCard').innerHTML = `
-                <div style="font-family: 'Playfair Display', serif; font-size: 2rem; text-align: center; margin-bottom: 1.5rem; color: #5c4a3d;">Thank You</div>
-                <div style="font-size: 1rem; margin-bottom: 1rem; text-align: center; font-weight: 500;">Dear Michael,</div>
-                <div style="font-size: 0.95rem; line-height: 1.8; text-align: justify; color: #3d3d3d;">
-                    Time has truly flown since our beautiful wedding day. Your generous gift has been such a blessing as we've settled into married life together. We have been putting it toward creating our home, and every time we make a purchase, we think of your kindness and generosity. Thank you so much for celebrating with us and for your thoughtful gift.
-                </div>
-                <div style="text-align: center; margin-top: 2rem;">
-                    <div style="font-size: 0.9rem; color: #6b5a4a; font-style: italic; margin-bottom: 0.5rem;">With love and appreciation,</div>
-                    <div style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #5c4a3d;">Collin and Annika</div>
-                </div>
-            `;
-        }
-
-        // Payment Modal
-        function openPayment(plan) {
-            const prices = { starter: 19, premium: 39, unlimited: 79 };
-            document.getElementById('payAmount').textContent = prices[plan];
-            document.getElementById('paymentModal').classList.add('active');
-        }
-
-        function closePayment() {
-            document.getElementById('paymentModal').classList.remove('active');
-        }
-
-        document.getElementById('paymentForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            alert('Payment processed successfully! Check your email for download instructions.');
-            closePayment();
-        });
-
-        // Close modal on outside click
-        document.getElementById('paymentModal').addEventListener('click', (e) => {
-            if (e.target.id === 'paymentModal') closePayment();
-        });
-
-        // Smooth scroll
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
-        });
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
