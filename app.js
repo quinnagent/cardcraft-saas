@@ -15,18 +15,6 @@ let currentState = {
     currentPlan: null
 };
 
-// Sample guest data for demo
-const sampleGuests = [
-    { name: "Michael Johnson", gift: "Cash gift - $200", message: "" },
-    { name: "Janet and Stacey Miller", gift: "Target gift card - $50", message: "" },
-    { name: "Mr. and Mrs. Robert Smith", gift: "KitchenAid Stand Mixer", message: "" },
-    { name: "Emily and David Chen", gift: "Wine glasses set", message: "" },
-    { name: "Aunt Susan", gift: "Cash gift - $500", message: "" },
-    { name: "The Thompson Family", gift: "Instant Pot", message: "" },
-    { name: "Cousin Jake", gift: "Amazon gift card - $100", message: "" },
-    { name: "Grandma Betty", gift: "Handmade quilt", message: "" }
-];
-
 // Pre-written templates
 const prewrittenTemplates = {
     "Cash gift": "Time has truly flown since our beautiful wedding day. Your generous gift has been such a blessing as we've settled into married life together. We have been putting it toward creating our home, and every time we make a purchase, we think of your kindness and generosity. Thank you so much for celebrating with us and for your thoughtful gift.",
@@ -183,8 +171,43 @@ function goToStep(stepNum) {
         } else if (currentState.messageType === 'ai' && currentState.generatedMessages.length > 0) {
             showSection('simpleEdit');
             return;
+        } else if (currentState.messageType === 'prewritten') {
+            // For pre-written messages, validate that guests have messages
+            if (currentState.guests.length === 0) {
+                alert('Please upload a CSV file first.');
+                showSection('upload');
+                return;
+            }
+            
+            const missingMessages = currentState.guests.filter(g => !g.message || g.message.trim() === '');
+            if (missingMessages.length > 0) {
+                alert(`You selected "Pre-Written Messages" but ${missingMessages.length} guest${missingMessages.length === 1 ? '' : 's'} in your CSV ${missingMessages.length === 1 ? 'is' : 'are'} missing message text.\n\nPlease either:\n• Add message text to the "Message" column in your CSV and re-upload, or\n• Go back and choose "AI-Assisted Messages" instead`);
+                showSection('upload');
+                return;
+            }
         }
-        // Pre-written goes to preview
+    }
+    
+    // If going to step 5 (pricing), validate that we have complete messages
+    if (stepNum === 5) {
+        if (currentState.guests.length === 0) {
+            alert('Please upload a CSV file first.');
+            showSection('upload');
+            return;
+        }
+        
+        if (currentState.messageType === 'prewritten') {
+            const missingMessages = currentState.guests.filter(g => !g.message || g.message.trim() === '');
+            if (missingMessages.length > 0) {
+                alert(`You selected "Pre-Written Messages" but ${missingMessages.length} guest${missingMessages.length === 1 ? '' : 's'} in your CSV ${missingMessages.length === 1 ? 'is' : 'are'} missing message text.\n\nPlease either:\n• Add message text to the "Message" column in your CSV and re-upload, or\n• Go back and choose "AI-Assisted Messages" instead`);
+                showSection('upload');
+                return;
+            }
+        } else if (currentState.messageType === 'ai' && currentState.generatedMessages.length === 0) {
+            alert('Please generate AI messages first.');
+            showSection('aiGeneration');
+            return;
+        }
     }
 
     currentState.step = stepNum;

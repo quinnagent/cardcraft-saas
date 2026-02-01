@@ -68,12 +68,20 @@ async function generateMessageWithAI(guest, tone) {
       throw new Error(`OpenRouter API error: ${response.status} - ${errorData}`);
     }
 
-    const data = await response.json();
-    console.log('OpenRouter response received');
+    const responseText = await response.text();
+    console.log('OpenRouter raw response:', responseText.substring(0, 200));
+    
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('Failed to parse OpenRouter response as JSON:', responseText.substring(0, 500));
+      throw new Error('Invalid JSON response from OpenRouter');
+    }
     
     if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-      console.error('Unexpected OpenRouter response:', JSON.stringify(data));
-      throw new Error('Invalid response from OpenRouter');
+      console.error('Unexpected OpenRouter response structure:', JSON.stringify(data));
+      throw new Error('Invalid response structure from OpenRouter');
     }
     
     return data.choices[0].message.content.trim();
