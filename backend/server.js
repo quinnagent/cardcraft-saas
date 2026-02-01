@@ -29,25 +29,27 @@ const emailTransporter = nodemailer.createTransport({
   }
 });
 
-// LLM Integration with Kimi
+// LLM Integration with OpenRouter
 async function generateMessageWithAI(guest, tone) {
-  const KIMI_API_KEY = process.env.KIMI_API_KEY;
-  if (!KIMI_API_KEY) {
-    console.warn('KIMI_API_KEY not set, using fallback messages');
+  const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+  if (!OPENROUTER_API_KEY) {
+    console.warn('OPENROUTER_API_KEY not set, using fallback messages');
     return generateFallbackMessage(guest, tone);
   }
 
   const prompt = `Write a ${tone} wedding thank you note to ${guest.name} who gave a ${guest.gift}. Keep it 2-3 sentences, warm and personal.`;
 
   try {
-    const response = await fetch('https://api.moonshot.cn/v1/chat/completions', {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${KIMI_API_KEY}`
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'HTTP-Referer': 'https://cardcraft.app',
+        'X-Title': 'CardCraft'
       },
       body: JSON.stringify({
-        model: 'kimi-for-coding',
+        model: 'moonshotai/kimi-k2.5',
         messages: [
           { role: 'system', content: 'You are a helpful assistant that writes personalized wedding thank you notes.' },
           { role: 'user', content: prompt }
@@ -58,13 +60,15 @@ async function generateMessageWithAI(guest, tone) {
     });
 
     if (!response.ok) {
-      throw new Error(`Kimi API error: ${response.status}`);
+      const errorData = await response.text();
+      console.error('OpenRouter API error:', errorData);
+      throw new Error(`OpenRouter API error: ${response.status}`);
     }
 
     const data = await response.json();
     return data.choices[0].message.content.trim();
   } catch (error) {
-    console.error('Error calling Kimi API:', error);
+    console.error('Error calling OpenRouter API:', error);
     return generateFallbackMessage(guest, tone);
   }
 }
