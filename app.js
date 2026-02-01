@@ -219,6 +219,19 @@ function goHome() {
     document.getElementById('hero').scrollIntoView({ behavior: 'smooth' });
 }
 
+function scrollToSection(sectionId) {
+    // First go home to show landing page sections
+    goHome();
+    
+    // Then scroll to the specific section
+    setTimeout(() => {
+        const section = document.getElementById(sectionId);
+        if (section) {
+            section.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, 100);
+}
+
 // File Upload
 function initUpload() {
     const uploadBox = document.getElementById('uploadBox');
