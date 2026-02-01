@@ -85,10 +85,27 @@ async function generateMessageWithAI(guest, tone) {
 
 // CORS configuration - explicitly allow GitHub Pages
 const corsOptions = {
-  origin: ['https://quinnagent.github.io', 'http://localhost:8080', 'http://localhost:3000'],
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    
+    // Allowed origins list
+    const allowedOrigins = [
+      'https://quinnagent.github.io',
+      'http://localhost:8080',
+      'http://localhost:3000'
+    ];
+    
+    // Check if origin is allowed (exact match or subdomain of quinnagent.github.io)
+    if (allowedOrigins.includes(origin) || origin.endsWith('.quinnagent.github.io') || origin.includes('quinnagent.github.io')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With'],
   exposedHeaders: ['Content-Length', 'X-Request-Id']
 };
 app.use(cors(corsOptions));
@@ -317,7 +334,22 @@ app.put('/api/cards/:id', authenticate, (req, res) => {
 });
 
 // Generate AI messages - no auth required for guest checkout
+// Explicit CORS headers for this endpoint to ensure it works from any frontend origin
+app.options('/api/generate-ai-messages', (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.sendStatus(200);
+});
+
 app.post('/api/generate-ai-messages', async (req, res) => {
+  // Set CORS headers explicitly for this public endpoint
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
   const { tone, guests } = req.body;
   
   if (!guests || !Array.isArray(guests) || guests.length === 0) {
