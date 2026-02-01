@@ -83,14 +83,18 @@ async function generateMessageWithAI(guest, tone) {
   }
 }
 
-// CORS configuration - allow all origins for now
+// CORS configuration - explicitly allow GitHub Pages
 const corsOptions = {
-  origin: true,
+  origin: ['https://quinnagent.github.io', 'http://localhost:8080', 'http://localhost:3000'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
+  exposedHeaders: ['Content-Length', 'X-Request-Id']
 };
 app.use(cors(corsOptions));
+
+// Handle preflight requests
+app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, '../frontend')));
 
