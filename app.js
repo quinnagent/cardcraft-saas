@@ -157,6 +157,12 @@ function startCreating() {
     showSection('templates');
 }
 
+function goToUpload() {
+    currentState.step = 2;
+    updateProgressBar();
+    showSection('upload');
+}
+
 // File Upload
 function initUpload() {
     const uploadBox = document.getElementById('uploadBox');
