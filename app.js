@@ -65,7 +65,8 @@ function initTemplateSelection() {
             document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
             card.classList.add('selected');
             currentState.template = card.dataset.template;
-            document.getElementById('templateContinue').disabled = false;
+            const errorMsg = document.getElementById('templateError');
+            if (errorMsg) errorMsg.style.display = 'none';
             updateProgressBar();
         });
     });
@@ -155,6 +156,87 @@ function updateProgressBar() {
 
 function startCreating() {
     showSection('templates');
+    document.getElementById('progressBar').style.display = 'block';
+}
+
+function goToMessageType() {
+    if (!currentState.template) {
+        const errorMsg = document.getElementById('templateError');
+        if (errorMsg) {
+            errorMsg.style.display = 'block';
+            setTimeout(() => {
+                errorMsg.style.display = 'none';
+            }, 3000);
+        }
+        return;
+    }
+    currentState.step = 2;
+    updateProgressBar();
+    showSection('messageType');
+}
+
+function goToUpload() {
+    currentState.step = 3;
+    updateProgressBar();
+    showSection('upload');
+}
+
+function goToStep(stepNum) {
+    // Define the section mapping for new flow:
+    // 1: Templates, 2: Message Type, 3: Upload, 4: AI/Preview, 5: Pricing
+    const stepSections = {
+        1: 'templates',
+        2: 'messageType',
+        3: 'upload',
+        4: 'previewExamples',
+        5: 'pricing'
+    };
+
+    // If going to step 4 (messages/preview), check what to show
+    if (stepNum === 4) {
+        if (currentState.messageType === 'ai' && currentState.generatedMessages.length === 0) {
+            showSection('aiGeneration');
+            return;
+        } else if (currentState.messageType === 'ai' && currentState.generatedMessages.length > 0) {
+            showSection('simpleEdit');
+            return;
+        }
+        // Pre-written goes to preview
+    }
+
+    currentState.step = stepNum;
+    updateProgressBar();
+    showSection(stepSections[stepNum]);
+}
+
+function goHome() {
+    // Hide all sections
+    document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+    });
+    
+    // Hide progress bar
+    document.getElementById('progressBar').style.display = 'none';
+    
+    // Reset step
+    currentState.step = 1;
+    updateProgressBar();
+    
+    // Scroll to hero
+    document.getElementById('hero').scrollIntoView({ behavior: 'smooth' });
+}
+
+function scrollToSection(sectionId) {
+    // First go home to show landing page sections
+    goHome();
+    
+    // Then scroll to the specific section
+    setTimeout(() => {
+        const section = document.getElementById(sectionId);
+        if (section) {
+            section.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, 100);
 }
 
 // File Upload
@@ -183,22 +265,96 @@ function initUpload() {
     });
 }
 
-function handleFile(file) {
+async function handleFile(file) {
     const uploadBox = document.getElementById('uploadBox');
+    
+    // Check file type
+    if (!file.name.endsWith('.csv')) {
+        uploadBox.innerHTML = `
+            <div class="upload-icon" style="color: #c44;">✗</div>
+            <h3 style="color: #c44;">Invalid file type</h3>
+            <p>Please upload a CSV file (.csv)</p>
+            <button class="btn" style="margin-top: 1rem;" onclick="document.getElementById('fileInput').click()">Try Again</button>
+        `;
+        return;
+    }
+    
     uploadBox.innerHTML = `
-        <div class="upload-icon">✓</div>
-        <h3>File uploaded successfully!</h3>
+        <div class="upload-icon">⏳</div>
+        <h3>Processing...</h3>
         <p>${file.name}</p>
-        <p style="color: #666; font-size: 0.9rem; margin-top: 1rem;">Processing ${sampleGuests.length} guests...</p>
     `;
     
-    // Simulate processing delay
-    setTimeout(() => {
-        currentState.guests = [...sampleGuests];
-        currentState.step = 3;
-        updateProgressBar();
-        showSection('messageType');
-    }, 1500);
+    // Simulate backend upload with validation
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+        // For demo, we simulate the backend validation
+        await simulateCSVValidation(file);
+        
+        uploadBox.innerHTML = `
+            <div class="upload-icon">✓</div>
+            <h3>File uploaded successfully!</h3>
+            <p>${file.name}</p>
+            <p style="color: #666; font-size: 0.9rem; margin-top: 1rem;">Processing ${sampleGuests.length} guests...</p>
+        `;
+        
+        // Simulate processing delay
+        setTimeout(() => {
+            currentState.guests = [...sampleGuests];
+            
+            // Route based on message type choice
+            if (currentState.messageType === 'prewritten') {
+                generatePrewrittenMessages();
+                showPreviewExamples();
+            } else {
+                showSection('aiGeneration');
+            }
+        }, 1500);
+        
+    } catch (error) {
+        uploadBox.innerHTML = `
+            <div class="upload-icon" style="color: #c44;">✗</div>
+            <h3 style="color: #c44;">Upload failed</h3>
+            <p>${error.message}</p>
+            <div style="background: #fee; padding: 1rem; border-radius: 8px; margin: 1rem 0; text-align: left; font-size: 0.9rem;">
+                <strong>Make sure your CSV has:</strong>
+                <ul style="margin: 0.5rem 0 0 1.5rem;">
+                    <li>Column headers: Name, Gift, Message (optional)</li>
+                    <li>One guest per row</li>
+                    <li>No empty rows</li>
+                </ul>
+            </div>
+            <button class="btn" style="margin-top: 1rem;" onclick="document.getElementById('fileInput').click()">Try Again</button>
+        `;
+    }
+}
+
+function simulateCSVValidation(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const text = e.target.result;
+            const lines = text.split('\n').filter(line => line.trim());
+            
+            if (lines.length < 2) {
+                reject(new Error('CSV file is empty or has no data rows'));
+                return;
+            }
+            
+            const headers = lines[0].toLowerCase().split(',').map(h => h.trim());
+            
+            if (!headers.includes('name') || !headers.includes('gift')) {
+                reject(new Error('CSV must have "Name" and "Gift" columns'));
+                return;
+            }
+            
+            resolve();
+        };
+        reader.onerror = () => reject(new Error('Could not read file'));
+        reader.readAsText(file);
+    });
 }
 
 // Message Type Selection
@@ -211,14 +367,8 @@ function selectMessageType(type) {
     event.currentTarget.classList.add('selected');
     
     setTimeout(() => {
-        if (type === 'prewritten') {
-            // Generate pre-written messages and go to preview
-            generatePrewrittenMessages();
-            showSection('previewExamples');
-        } else {
-            // Show AI generation options
-            showSection('aiGeneration');
-        }
+        // Both paths now go to upload first, then handle messages
+        goToUpload();
     }, 300);
 }
 
@@ -353,23 +503,104 @@ function closePaymentModal() {
     closePayment();
 }
 
+// Initialize Stripe
+const stripe = Stripe('pk_live_51SvqbT2Oew1Lm9HTRyzIMLCabQLvxAyCEE5Pl4j1xGuxAqzx3CMNMzsbNgpEx3dNgZztdJHGd9Tg1SOWQaQgBYeK00PygXjyxH');
+let cardElement;
+
+// Initialize card element when payment modal opens
+function initStripe() {
+    if (!cardElement) {
+        const elements = stripe.elements();
+        cardElement = elements.create('card', {
+            style: {
+                base: {
+                    fontSize: '16px',
+                    color: '#3d3d3d',
+                    '::placeholder': { color: '#aab7c4' }
+                }
+            }
+        });
+        cardElement.mount('#cardElement');
+        
+        cardElement.on('change', (event) => {
+            const errorDiv = document.getElementById('cardErrors');
+            errorDiv.textContent = event.error ? event.error.message : '';
+        });
+    }
+}
+
 // Payment form submission
-document.getElementById('paymentForm')?.addEventListener('submit', (e) => {
+document.getElementById('paymentForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    // Simulate payment processing
-    const btn = e.target.querySelector('.pay-btn');
+    const btn = document.getElementById('payButton');
     const originalText = btn.textContent;
     btn.textContent = 'Processing...';
     btn.disabled = true;
     
-    setTimeout(() => {
-        alert('Payment successful! Your cards are ready for download. Check your email for the download link.');
+    const email = document.getElementById('emailInput').value;
+    
+    try {
+        // Simple payment flow - no registration needed
+        // 1. Create payment intent (guest checkout)
+        const paymentRes = await fetch(`${API_URL}/create-payment-intent`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                plan: currentState.currentPlan || 'premium',
+                email: email,
+                guests: currentState.guests || [],
+                template: currentState.template || 'classic'
+            })
+        });
+        
+        if (!paymentRes.ok) {
+            const error = await paymentRes.json();
+            throw new Error(error.error || 'Payment setup failed');
+        }
+        
+        const { clientSecret } = await paymentRes.json();
+        
+        // 2. Confirm payment with Stripe
+        const { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
+            payment_method: {
+                card: cardElement,
+                billing_details: { email }
+            }
+        });
+        
+        if (error) throw new Error(error.message);
+        
+        // 3. Confirm on backend (this triggers email with download link)
+        await fetch(`${API_URL}/confirm-payment-simple`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                paymentIntentId: paymentIntent.id,
+                email: email
+            })
+        });
+        
+        alert('Payment successful! Check your email for the download link.');
         closePayment();
+        
+    } catch (err) {
+        document.getElementById('cardErrors').textContent = err.message;
+    } finally {
         btn.textContent = originalText;
         btn.disabled = false;
-    }, 2000);
+    }
 });
+
+// Initialize stripe when payment modal opens
+const originalOpenPayment = openPayment;
+openPayment = function(plan) {
+    currentState.currentPlan = plan;
+    const prices = { starter: 19, premium: 39, unlimited: 79 };
+    document.getElementById('payAmount').textContent = prices[plan];
+    document.getElementById('paymentModal').classList.add('active');
+    initStripe();
+};
 
 // Close modal on outside click
 document.getElementById('paymentModal')?.addEventListener('click', (e) => {
