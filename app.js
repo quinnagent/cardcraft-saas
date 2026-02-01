@@ -1,5 +1,8 @@
 // CardCraft Frontend JavaScript
 
+// API Configuration
+const API_URL = 'https://pacific-vision-production.up.railway.app/api';
+
 // State management
 let currentState = {
     step: 1,
