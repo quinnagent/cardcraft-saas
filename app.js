@@ -265,31 +265,96 @@ function initUpload() {
     });
 }
 
-function handleFile(file) {
+async function handleFile(file) {
     const uploadBox = document.getElementById('uploadBox');
+    
+    // Check file type
+    if (!file.name.endsWith('.csv')) {
+        uploadBox.innerHTML = `
+            <div class="upload-icon" style="color: #c44;">✗</div>
+            <h3 style="color: #c44;">Invalid file type</h3>
+            <p>Please upload a CSV file (.csv)</p>
+            <button class="btn" style="margin-top: 1rem;" onclick="document.getElementById('fileInput').click()">Try Again</button>
+        `;
+        return;
+    }
+    
     uploadBox.innerHTML = `
-        <div class="upload-icon">✓</div>
-        <h3>File uploaded successfully!</h3>
+        <div class="upload-icon">⏳</div>
+        <h3>Processing...</h3>
         <p>${file.name}</p>
-        <p style="color: #666; font-size: 0.9rem; margin-top: 1rem;">Processing ${sampleGuests.length} guests...</p>
     `;
     
-    // Simulate processing delay
-    setTimeout(() => {
-        currentState.guests = [...sampleGuests];
+    // Simulate backend upload with validation
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+        // For demo, we simulate the backend validation
+        await simulateCSVValidation(file);
         
-        // Route based on message type choice
-        if (currentState.messageType === 'prewritten') {
-            generatePrewrittenMessages();
-            currentState.step = 4;
-            updateProgressBar();
-            showSection('previewExamples');
-        } else {
-            currentState.step = 4;
-            updateProgressBar();
-            showSection('aiGeneration');
-        }
-    }, 1500);
+        uploadBox.innerHTML = `
+            <div class="upload-icon">✓</div>
+            <h3>File uploaded successfully!</h3>
+            <p>${file.name}</p>
+            <p style="color: #666; font-size: 0.9rem; margin-top: 1rem;">Processing ${sampleGuests.length} guests...</p>
+        `;
+        
+        // Simulate processing delay
+        setTimeout(() => {
+            currentState.guests = [...sampleGuests];
+            
+            // Route based on message type choice
+            if (currentState.messageType === 'prewritten') {
+                generatePrewrittenMessages();
+                showPreviewExamples();
+            } else {
+                showSection('aiGeneration');
+            }
+        }, 1500);
+        
+    } catch (error) {
+        uploadBox.innerHTML = `
+            <div class="upload-icon" style="color: #c44;">✗</div>
+            <h3 style="color: #c44;">Upload failed</h3>
+            <p>${error.message}</p>
+            <div style="background: #fee; padding: 1rem; border-radius: 8px; margin: 1rem 0; text-align: left; font-size: 0.9rem;">
+                <strong>Make sure your CSV has:</strong>
+                <ul style="margin: 0.5rem 0 0 1.5rem;">
+                    <li>Column headers: Name, Gift, Message (optional)</li>
+                    <li>One guest per row</li>
+                    <li>No empty rows</li>
+                </ul>
+            </div>
+            <button class="btn" style="margin-top: 1rem;" onclick="document.getElementById('fileInput').click()">Try Again</button>
+        `;
+    }
+}
+
+function simulateCSVValidation(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const text = e.target.result;
+            const lines = text.split('\n').filter(line => line.trim());
+            
+            if (lines.length < 2) {
+                reject(new Error('CSV file is empty or has no data rows'));
+                return;
+            }
+            
+            const headers = lines[0].toLowerCase().split(',').map(h => h.trim());
+            
+            if (!headers.includes('name') || !headers.includes('gift')) {
+                reject(new Error('CSV must have "Name" and "Gift" columns'));
+                return;
+            }
+            
+            resolve();
+        };
+        reader.onerror = () => reject(new Error('Could not read file'));
+        reader.readAsText(file);
+    });
 }
 
 // Message Type Selection

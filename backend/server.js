@@ -190,28 +190,80 @@ app.get('/api/projects', authenticate, (req, res) => {
   });
 });
 
-// CSV Upload
+// CSV Upload with validation
 app.post('/api/projects/:id/upload', authenticate, upload.single('file'), (req, res) => {
   const projectId = req.params.id;
   const cards = [];
+  const errors = [];
+  let rowCount = 0;
+  
+  if (!req.file) {
+    return res.status(400).json({ 
+      error: 'No file uploaded',
+      message: 'Please select a CSV file to upload'
+    });
+  }
   
   fs.createReadStream(req.file.path)
     .pipe(csv())
+    .on('headers', (headers) => {
+      // Validate headers
+      const normalizedHeaders = headers.map(h => h.toLowerCase().trim());
+      const hasName = normalizedHeaders.includes('name');
+      const hasGift = normalizedHeaders.includes('gift');
+      const hasMessage = normalizedHeaders.includes('message');
+      
+      if (!hasName || !hasGift) {
+        errors.push('CSV must have "Name" and "Gift" columns. Optional: "Message" column.');
+      }
+    })
     .on('data', (row) => {
+      rowCount++;
+      const name = row.Name || row.name;
+      const gift = row.Gift || row.gift;
+      
+      if (!name || !gift) {
+        errors.push(`Row ${rowCount}: Missing name or gift`);
+        return;
+      }
+      
       cards.push({
         project_id: projectId,
-        recipient_name: row.Name || row.name,
-        gift: row.Gift || row.gift,
-        message: row.Message || row.message || generateDefaultMessage(row.Gift || row.gift)
+        recipient_name: name,
+        gift: gift,
+        message: row.Message || row.message || generateDefaultMessage(gift)
       });
     })
     .on('end', () => {
+      fs.unlinkSync(req.file.path);
+      
+      if (errors.length > 0) {
+        return res.status(400).json({ 
+          error: 'Invalid CSV format',
+          details: errors,
+          message: 'Please fix the CSV format and try again'
+        });
+      }
+      
+      if (cards.length === 0) {
+        return res.status(400).json({
+          error: 'Empty CSV',
+          message: 'No valid guest data found in the CSV file'
+        });
+      }
+      
       const stmt = db.prepare('INSERT INTO cards (project_id, recipient_name, gift, message) VALUES (?, ?, ?, ?)');
       cards.forEach(card => stmt.run(card.project_id, card.recipient_name, card.gift, card.message));
       stmt.finalize();
       
-      fs.unlinkSync(req.file.path);
       res.json({ count: cards.length });
+    })
+    .on('error', (err) => {
+      fs.unlinkSync(req.file.path);
+      res.status(400).json({
+        error: 'CSV parse error',
+        message: 'Could not read the CSV file. Make sure it is a valid CSV format.'
+      });
     });
 });
 
