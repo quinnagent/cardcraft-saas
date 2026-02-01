@@ -79,12 +79,12 @@ function generateFallbackMessage(guest, tone) {
   return fallbacks[tone] || fallbacks.warm;
 }
 
-// CORS configuration
+// CORS configuration - allow all origins for now
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://quinnagent.github.io', 'https://cardcraft.vercel.app', 'https://your-domain.com'] 
-    : ['http://localhost:8080', 'http://localhost:3000', 'https://quinnagent.github.io'],
-  credentials: true
+  origin: true,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 };
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
