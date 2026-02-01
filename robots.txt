@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://quinnagent.github.io/cardcraft-saas/sitemap.xml
+
+# Disallow admin and API paths
+Disallow: /api/
+Disallow: /admin/
+Disallow: /pdfs/
+
+# Crawl-delay for bots
+Crawl-delay: 1
