@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CardCraft - Wedding Thank You Cards Made Simple</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #5c4a3d;
+            --secondary: #8b7355;
+            --accent: #c9b8a8;
+            --light: #f8f6f3;
+            --white: #ffffff;
+            --text: #3d3d3d;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background: var(--light);
+            line-height: 1.6;
+        }
+        
+        h1, h2, h3, h4 {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        /* Navigation */
+        nav {
+            background: var(--white);
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: var(--secondary);
+        }
+        
+        .btn {
+            background: var(--primary);
+            color: var(--white);
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            background: var(--secondary);
+            transform: translateY(-1px);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background: var(--primary);
+            color: var(--white);
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding: 8rem 5% 5rem;
+            text-align: center;
+            background: linear-gradient(135deg, var(--light) 0%, var(--white) 100%);
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+        
+        .hero p {
+            font-size: 1.25rem;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+        
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        
+        /* How It Works */
+        .steps {
+            padding: 5rem 5%;
+            background: var(--white);
+        }
+        
+        .steps h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 3rem;
+        }
+        
+        .step-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .step {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: var(--accent);
+            color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.25rem;
+            margin: 0 auto 1rem;
+        }
+        
+        .step h3 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Templates Section */
+        .templates {
+            padding: 5rem 5%;
+            background: var(--light);
+        }
+        
+        .templates h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .templates-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 3rem;
+        }
+        
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .template-card {
+            background: var(--white);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .template-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+        
+        .template-card.selected {
+            box-shadow: 0 0 0 3px var(--secondary);
+        }
+        
+        .template-preview {
+            height: 200px;
+            background: #fefefe;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            font-size: 0.7rem;
+            position: relative;
+        }
+        
+        /* Mini card preview styles */
+        .mini-card {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem;
+            text-align: center;
+        }
+        
+        .mini-card.classic {
+            border: 2px solid #c9b8a8;
+        }
+        
+        .mini-card.modern {
+            border: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .mini-card.elegant::before {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            right: 4px;
+            bottom: 4px;
+            border: 1px solid #d4c5b5;
+            pointer-events: none;
+        }
+        
+        .mini-card.rustic {
+            border: 1px dashed #b8a090;
+        }
+        
+        .mini-card.floral {
+            background: linear-gradient(135deg, #fff9f7 0%, #fdf5f0 100%);
+        }
+        
+        .mini-card.minimal {
+            border: 1px solid #e5e5e5;
+        }
+        
+        .mini-card.vintage {
+            background: #faf8f5;
+            border: 1px solid #c9b8a8;
+        }
+        
+        .mini-card.romantic {
+            background: linear-gradient(180deg, #fff5f2 0%, #f9eae5 100%);
+            border: 1px solid #e8d4cc;
+        }
+        
+        .mini-card.botanical {
+            background: #f5f8f5;
+            border: 1px solid #b8c4b8;
+        }
+        
+        .mini-card.luxe {
+            background: linear-gradient(135deg, #faf9f7 0%, #f0ece5 100%);
+            border: 2px solid #b8a090;
+        }
+        
+        .mini-header {
+            font-family: 'Playfair Display', serif;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .mini-text {
+            font-size: 0.5rem;
+            line-height: 1.4;
+            opacity: 0.7;
+        }
+        
+        .template-info {
+            padding: 1rem;
+        }
+        
+        .template-info h4 {
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .template-info p {
+            font-size: 0.875rem;
+            color: #666;
+        }
+        
+        .template-check {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 24px;
+            height: 24px;
+            background: var(--secondary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .template-card.selected .template-check {
+            opacity: 1;
+        }
+        
+        /* Upload Section */
+        .upload-section {
+            padding: 5rem 5%;
+            background: var(--white);
+        }
+        
+        .upload-section h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .upload-container {
+            max-width: 600px;
+            margin: 3rem auto;
+        }
+        
+        .upload-box {
+            border: 2px dashed var(--accent);
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            background: var(--light);
+            transition: all 0.3s;
+        }
+        
+        .upload-box:hover {
+            border-color: var(--secondary);
+            background: #f0ece5;
+        }
+        
+        .upload-box.dragover {
+            border-color: var(--primary);
+            background: #e8e0d8;
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .upload-box h3 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .upload-box p {
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .upload-btn {
+            background: var(--primary);
+            color: white;
+            padding: 0.875rem 2rem;
+            border: none;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-btn:hover {
+            background: var(--secondary);
+        }
+        
+        .upload-template {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--light);
+            border-radius: 8px;
+        }
+        
+        .upload-template h4 {
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+        
+        .upload-template code {
+            display: block;
+            background: white;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.875rem;
+            color: #555;
+            border: 1px solid #e0e0e0;
+        }
+        
+        /* Preview Section */
+        .preview-section {
+            padding: 5rem 5%;
+            background: var(--light);
+            display: none;
+        }
+        
+        .preview-section.active {
+            display: block;
+        }
+        
+        .preview-section h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 2rem;
+        }
+        
+        .preview-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .preview-card {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 3rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            min-height: 600px;
+        }
+        
+        /* Pricing Section */
+        .pricing {
+            padding: 5rem 5%;
+            background: var(--white);
+        }
+        
+        .pricing h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 3rem;
+        }
+        
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .pricing-card {
+            background: var(--light);
+            padding: 2.5rem;
+            border-radius: 12px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .pricing-card.featured {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .pricing-card.featured h3,
+        .pricing-card.featured .price,
+        .pricing-card.featured .price span {
+            color: white;
+        }
+        
+        .popular-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: var(--primary);
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .pricing-card h3 {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .price {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+        
+        .price span {
+            font-size: 1rem;
+            font-weight: 400;
+            color: #666;
+        }
+        
+        .pricing-features {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+        
+        .pricing-features li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .pricing-card.featured .pricing-features li {
+            border-bottom-color: rgba(255,255,255,0.2);
+        }
+        
+        /* Payment Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-header h3 {
+            color: var(--primary);
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--primary);
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.875rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+        
+        .card-element {
+            padding: 0.875rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+        }
+        
+        .pay-btn {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .pay-btn:hover {
+            background: var(--secondary);
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--primary);
+            color: var(--white);
+            padding: 3rem 5%;
+            text-align: center;
+        }
+        
+        footer p {
+            opacity: 0.8;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .template-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .step-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .pricing-grid {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+            }
+            
+            .pricing-card.featured {
+                transform: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .template-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .step-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">CardCraft</div>
+        <div class="nav-links">
+            <a href="#templates">Templates</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#upload" class="btn">Get Started</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Wedding Thank You Cards<br>Made Beautifully Simple</h1>
+        <p>Choose from 10 elegant templates, upload your guest list, and generate personalized thank you cards in minutes. Print at home or send to a professional printer.</p>
+        <div class="hero-cta">
+            <a href="#templates" class="btn">Browse Templates</a>
+            <a href="#upload" class="btn btn-outline">Start Creating</a>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="steps" id="how-it-works">
+        <h2>How It Works</h2>
+        <div class="step-grid">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Choose Template</h3>
+                <p>Browse our collection of 10 elegant designs crafted by professional stationers</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Upload List</h3>
+                <p>Upload a CSV with guest names and gifts. We'll help you personalize each message</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Preview</h3>
+                <p>Review every card, make edits, and see exactly how they'll look when printed</p>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <h3>Download & Print</h3>
+                <p>Get print-ready PDFs formatted perfectly for 4-up printing on cardstock</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Templates Section -->
+    <section class="templates" id="templates">
+        <h2>Choose Your Style</h2>
+        <p class="templates-subtitle">10 elegant designs, all customizable</p>
+        
+        <div class="template-grid">
+            <div class="template-card" data-template="classic">
+                <div class="template-check">✓</div>
+                <div class="template-preview">
+                    <div class="mini-card classic">
+                        <div class="mini-header" style="font-family: 'Playfair Display', serif; color: #5c4a3d; font-size: 1rem;">Thank You</div>
+                        <div class="mini-text">Classic double border with elegant serif typography. Timeless and refined.</div>
+                    </div>
+                </div>
+                <div class="template-info">
+                    <h4>Classic Elegance</h4>
+                    <p>Traditional & timeless</p>
+                </div>
+            </div>
+            
+            <div class="template-card" data-template="modern">
+                <div class="template-check">✓</div>
+                <div class="template-preview">
+                    <div class="mini-card modern">
+                        <div class="mini-header" style="font-family: 'Inter', sans-serif; color: #2d2d2d; font-size: 0.9rem; letter-spacing: 3px; text-transform: uppercase;">Thank You</div>
+                        <div class="mini-text">Clean lines with modern sans-serif fonts. Minimal and sophisticated.</div>
+                    </div>
+                </div>
+                <div class="template-info">
+                    <h4>Modern Minimal</h4>
+                    <p>Clean & contemporary</p>
+                </div>
+            </div>
+            
+            <div class="template-card" data-template="romantic">
+                <div class="template-check">✓</div>
+                <div class="template-preview">
+                    <div class="mini-card romantic">
+                        <div class="mini-header" style="font-family: 'Playfair Display', serif; color: #c9a89a; font-size: 1rem; font-style: italic;">Thank You</div>
+                        <div class="mini-text">Soft blush tones with flowing script accents. Dreamy and romantic.</div>
+                    </div>
+                </div>
+                <div class="template-info">
+                    <h4>Romantic Blush</h4>
+                    <p>Soft & dreamy</p>
+                </div>
+            </div>
+            
+            <div class="template-card" data-template="botanical">
+                <div class="template-check">✓</div>
+                <div class="template-preview">
+                    <div class="mini-card botanical">
+                        <div class="mini-header" style="font-family: 'Playfair Display', serif; color: #6b8b6b; font-size: 1rem;">Thank You</div>
+                        <div class="mini-text">Sage green accents with natural elements. Organic and fresh.</div>
+                    </div>
+                </div>
+                <div class="template-info">
+                    <h4>Botanical</h4>
+                    <p>Natural & organic</p>
+                </div>
+            </div>
+            
+            <div class="template-card" data-template="vintage">
+                <div class="template-check">✓</div>
+                <div class="template-preview">
+                    <div class="mini-card vintage">
+                        <div class="mini-header" style="font-family: 'Playfair Display', serif; color: #5c4a3d; font-size: 1rem; letter-spacing: 2px;">Thank You</div>
+                        <div class="mini-text">Warm cream tones with vintage-inspired details. Nostalgic charm.</div>
+                    </div>
+                </div>
+                <div class="template-info">
+                    <h4>Vintage Charm</h4>
+                    <p>Warm & nostalgic</p>
+                </div>
+            </div>
+            
+            <div class="template-card" data-template="luxe">
+                <div class="template-check">✓</div>
+                <div class="template-preview">
+                    <div class="mini-card luxe">
+                        <div class="mini-header" style="font-family: 'Playfair Display', serif; color: #8b7355; font-size: 1.1rem; font-weight: 600;">Thank You</div>
+                        <div class="mini-text">Double border with champagne accents. Luxurious and elegant.</div>
+                    </div>
+                </div>
+                <div class="template-info">
+                    <h4>Champagne Luxe</h4>
+                    <p>Luxurious & refined</p>
+                </div>
+            </div>
+            
+            <div class="template-card" data-template="rustic">
+                <div class="template-check">✓</div>
+                <div class="template-preview">
+                    <div class="mini-card rustic">
+                        <div class="mini-header" style="font-family: 'Inter', sans-serif; color: #6b5a4a; font-size: 1rem; text-transform: uppercase; letter-spacing: 2px;">Thank You</div>
+                        <div class="mini-text">Dashed borders with earthy tones. Perfect for rustic weddings.</div>
+                    </div>
+                </div>
+                <div class="template-info">
+                    <h4>Rustic</h4>
+                    <p>Warm & earthy</p>
+                </div>
+            </div>
+            
+            <div class="template-card" data-template="floral">
+                <div class="template-check">✓</div>
+                <div class="template-preview">
+                    <div class="mini-card floral">
+                        <div class="mini-header" style="font-family: 'Playfair Display', serif; color: #a08080; font-size: 1rem;">Thank You</div>
+                        <div class="mini-text">Soft watercolor-inspired backgrounds. Delicate and feminine.</div>
+                    </div>
+                </div>
+                <div class="template-info">
+                    <h4>Watercolor</h4>
+                    <p>Artistic & soft</p>
+                </div>
+            </div>
+            
+            <div class="template-card" data-template="elegant">
+                <div class="template-check">✓</div>
+                <div class="template-preview">
+                    <div class="mini-card elegant" style="position: relative;">
+                        <div class="mini-header" style="font-family: 'Playfair Display', serif; color: #3d3d3d; font-size: 1rem; text-transform: uppercase; letter-spacing: 3px;">Thank You</div>
+                        <div class="mini-text">Ornate borders with sophisticated typography. Formal elegance.</div>
+                    </div>
+                </div>
+                <div class="template-info">
+                    <h4>Formal</h4>
+                    <p>Classic & formal</p>
+                </div>
+            </div>
+            
+            <div class="template-card" data-template="minimal">
+                <div class="template-check">✓</div>
+                <div class="template-preview">
+                    <div class="mini-card minimal">
+                        <div class="mini-header" style="font-family: 'Inter', sans-serif; color: #2d2d2d; font-size: 1rem; letter-spacing: 4px;">Thank You</div>
+                        <div class="mini-text">Clean white space with subtle borders. Understated elegance.</div>
+                    </div>
+                </div>
+                <div class="template-info">
+                    <h4>Minimal</h4>
+                    <p>Simple & clean</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Upload Section -->
+    <section class="upload-section" id="upload">
+        <h2>Upload Your Guest List</h2>
+        <div class="upload-container">
+            <div class="upload-box" id="uploadBox">
+                <div class="upload-icon">📄</div>
+                <h3>Drop your CSV file here</h3>
+                <p>or click to browse from your computer</p>
+                <input type="file" id="fileInput" class="file-input" accept=".csv,.xlsx,.xls">
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Select File</button>
+            </div>
+            
+            <div class="upload-template">
+                <h4>Required CSV Format:</h4>
+                <code>Name,Gift,Message<br>Michael,Cash gift,Thank you for...<br>Janet and Stacey,Target gift card,We love...<br>Mr. and Mrs. Smith,Kitchen mixer,The mixer...</code>
+            </div>
+        </div>
+    </section>
+
+    <!-- Preview Section -->
+    <section class="preview-section" id="preview">
+        <h2>Preview Your Cards</h2>
+        <div class="preview-controls">
+            <button class="btn btn-outline" id="prevCard">← Previous</button>
+            <span id="cardCounter">Card 1 of 45</span>
+            <button class="btn btn-outline" id="nextCard">Next →</button>
+        </div>
+        <div id="upgradePrompt" style="display: none;"></div>
+        <div class="preview-card" id="previewCard">
+            <input type="hidden" id="cardIndex" value="0">
+            <div id="recipientName" style="font-size: 1rem; margin-bottom: 1rem; text-align: center; font-weight: 500;">Dear Guest,</div>
+            <textarea id="cardMessage" style="width: 100%; min-height: 200px; padding: 1rem; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; font-size: 0.95rem; line-height: 1.6; resize: vertical;"></textarea>
+            <div id="giftNote" style="font-size: 0.875rem; color: #666; margin-top: 0.5rem; text-align: center;"></div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing" id="pricing">
+        <h2>Simple Pricing</h2>
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <h3>Starter</h3>
+                <div class="price">$19<span>/one-time</span></div>
+                <ul class="pricing-features">
+                    <li>Up to 25 cards</li>
+                    <li>All 10 templates</li>
+                    <li>PDF download</li>
+                    <li>Basic customization</li>
+                    <li>Email support</li>
+                </ul>
+                <button class="btn btn-outline" onclick="openPayment('starter')">Get Started</button>
+            </div>
+            
+            <div class="pricing-card featured">
+                <div class="popular-badge">Most Popular</div>
+                <h3>Premium</h3>
+                <div class="price">$39<span>/one-time</span></div>
+                <ul class="pricing-features">
+                    <li>Up to 100 cards</li>
+                    <li>All 10 templates</li>
+                    <li>PDF + PNG download</li>
+                    <li>Advanced customization</li>
+                    <li>Priority support</li>
+                    <li>Save & edit later</li>
+                </ul>
+                <button class="btn" onclick="openPayment('premium')" style="background: white; color: var(--primary);">Get Started</button>
+            </div>
+            
+            <div class="pricing-card">
+                <h3>Unlimited</h3>
+                <div class="price">$79<span>/one-time</span></div>
+                <ul class="pricing-features">
+                    <li>Unlimited cards</li>
+                    <li>All 10 templates</li>
+                    <li>All file formats</li>
+                    <li>White-label option</li>
+                    <li>Priority support</li>
+                    <li>Custom template request</li>
+                </ul>
+                <button class="btn btn-outline" onclick="openPayment('unlimited')">Get Started</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Payment Modal -->
+    <div class="modal" id="paymentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Complete Your Purchase</h3>
+                <button class="close-btn" onclick="closePayment()">×</button>
+            </div>
+            <form id="paymentForm">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" placeholder="you@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Card Information</label>
+                    <div class="card-element">
+                        <input type="text" placeholder="Card number" style="border: none; padding: 0;">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Expiry</label>
+                        <input type="text" placeholder="MM/YY">
+                    </div>
+                    <div class="form-group">
+                        <label>CVC</label>
+                        <input type="text" placeholder="123">
+                    </div>
+                </div>
+                <button type="submit" class="pay-btn">Pay $<span id="payAmount">39</span></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 CardCraft. Beautiful wedding stationery made simple.</p>
+    </footer>
+
+    <script>
+        // Template Selection
+        let selectedTemplate = null;
+        document.querySelectorAll('.template-card').forEach(card => {
+            card.addEventListener('click', () => {
+                document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                selectedTemplate = card.dataset.template;
+            });
+        });
+
+        // File Upload
+        const uploadBox = document.getElementById('uploadBox');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadBox.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadBox.classList.add('dragover');
+        });
+
+        uploadBox.addEventListener('dragleave', () => {
+            uploadBox.classList.remove('dragover');
+        });
+
+        uploadBox.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadBox.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length) handleFile(files[0]);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) handleFile(e.target.files[0]);
+        });
+
+        function handleFile(file) {
+            // Simulate processing
+            uploadBox.innerHTML = `
+                <div class="upload-icon">✓</div>
+                <h3>File uploaded successfully!</h3>
+                <p>${file.name}</p>
+                <button class="upload-btn" onclick="showPreview()">Preview Cards</button>
+            `;
+        }
+
+        function showPreview() {
+            document.getElementById('preview').classList.add('active');
+            document.getElementById('preview').scrollIntoView({ behavior: 'smooth' });
+            
+            // Load sample preview
+            document.getElementById('previewCard').innerHTML = `
+                <div style="font-family: 'Playfair Display', serif; font-size: 2rem; text-align: center; margin-bottom: 1.5rem; color: #5c4a3d;">Thank You</div>
+                <div style="font-size: 1rem; margin-bottom: 1rem; text-align: center; font-weight: 500;">Dear Michael,</div>
+                <div style="font-size: 0.95rem; line-height: 1.8; text-align: justify; color: #3d3d3d;">
+                    Time has truly flown since our beautiful wedding day. Your generous gift has been such a blessing as we've settled into married life together. We have been putting it toward creating our home, and every time we make a purchase, we think of your kindness and generosity. Thank you so much for celebrating with us and for your thoughtful gift.
+                </div>
+                <div style="text-align: center; margin-top: 2rem;">
+                    <div style="font-size: 0.9rem; color: #6b5a4a; font-style: italic; margin-bottom: 0.5rem;">With love and appreciation,</div>
+                    <div style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #5c4a3d;">Collin and Annika</div>
+                </div>
+            `;
+        }
+
+        // Payment Modal
+        function openPayment(plan) {
+            const prices = { starter: 19, premium: 39, unlimited: 79 };
+            document.getElementById('payAmount').textContent = prices[plan];
+            document.getElementById('paymentModal').classList.add('active');
+        }
+
+        function closePayment() {
+            document.getElementById('paymentModal').classList.remove('active');
+        }
+
+        document.getElementById('paymentForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Payment processed successfully! Check your email for download instructions.');
+            closePayment();
+        });
+
+        // Close modal on outside click
+        document.getElementById('paymentModal').addEventListener('click', (e) => {
+            if (e.target.id === 'paymentModal') closePayment();
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

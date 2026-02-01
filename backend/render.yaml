@@ -1,0 +1,24 @@
+# Render Deployment Configuration
+# https://render.com
+
+services:
+  - type: web
+    name: cardcraft-api
+    runtime: docker
+    plan: standard
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+    disk:
+      name: data
+      mountPath: /app/data
+      sizeGB: 1
