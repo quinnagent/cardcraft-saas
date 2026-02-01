@@ -394,13 +394,15 @@ function parseCSV(file) {
 }
 
 // Message Type Selection
-function selectMessageType(type) {
+function selectMessageType(type, element) {
     currentState.messageType = type;
     
     document.querySelectorAll('.message-option').forEach(opt => {
         opt.classList.remove('selected');
     });
-    event.currentTarget.classList.add('selected');
+    if (element) {
+        element.classList.add('selected');
+    }
     
     setTimeout(() => {
         // Both paths now go to upload first, then handle messages
@@ -439,13 +441,15 @@ function generatePrewrittenMessages() {
 }
 
 // AI Generation
-function selectTone(tone) {
+function selectTone(tone, element) {
     currentState.tone = tone;
     
     document.querySelectorAll('.tone-option').forEach(opt => {
         opt.classList.remove('selected');
     });
-    event.currentTarget.classList.add('selected');
+    if (element) {
+        element.classList.add('selected');
+    }
     
     document.getElementById('generateBtn').disabled = false;
 }

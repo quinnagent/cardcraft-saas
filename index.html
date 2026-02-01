@@ -1809,7 +1809,7 @@
         <p class="message-type-subtitle">How would you like to create your thank you messages?</p>
         
         <div class="message-options">
-            <div class="message-option" onclick="selectMessageType('prewritten')">
+            <div class="message-option" onclick="selectMessageType('prewritten', this)">
                 <div class="message-option-icon">✍️</div>
                 <h3>Pre-Written Messages</h3>
                 <p>Use our professionally crafted thank you templates. Perfect if you want elegant, ready-to-use messages.</p>
@@ -1821,7 +1821,7 @@
                 </ul>
             </div>
             
-            <div class="message-option" onclick="selectMessageType('ai')">
+            <div class="message-option" onclick="selectMessageType('ai', this)">
                 <div class="message-option-icon">🤖</div>
                 <h3>AI-Assisted Messages</h3>
                 <p>Let AI generate unique, personalized messages for each guest based on their gift and your style.</p>
@@ -1849,10 +1849,10 @@
             <div class="ai-tone-selector">
                 <label>Select Message Tone:</label>
                 <div class="tone-options">
-                    <div class="tone-option" onclick="selectTone('warm')">Warm & Heartfelt</div>
-                    <div class="tone-option" onclick="selectTone('formal')">Formal & Elegant</div>
-                    <div class="tone-option" onclick="selectTone('casual')">Casual & Friendly</div>
-                    <div class="tone-option" onclick="selectTone('poetic')">Poetic & Romantic</div>
+                    <div class="tone-option" onclick="selectTone('warm', this)">Warm & Heartfelt</div>
+                    <div class="tone-option" onclick="selectTone('formal', this)">Formal & Elegant</div>
+                    <div class="tone-option" onclick="selectTone('casual', this)">Casual & Friendly</div>
+                    <div class="tone-option" onclick="selectTone('poetic', this)">Poetic & Romantic</div>
                 </div>
             </div>
             
