@@ -544,28 +544,136 @@
             display: none;
         }
         
-        .upload-template {
+        .csv-guide {
             margin-top: 2rem;
-            padding: 1.5rem;
+            padding: 2rem;
+            background: var(--white);
+            border-radius: 12px;
+            border: 2px solid var(--accent);
+        }
+        
+        .csv-guide h4 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+            text-align: center;
+        }
+        
+        .csv-steps {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .csv-step {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+            padding: 1rem;
             background: var(--light);
             border-radius: 8px;
         }
         
-        .upload-template h4 {
+        .csv-step-num {
+            width: 28px;
+            height: 28px;
+            background: var(--secondary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+        }
+        
+        .csv-step-content strong {
+            display: block;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
+        }
+        
+        .csv-step-content p {
+            font-size: 0.875rem;
+            color: #666;
+            margin: 0;
+        }
+        
+        .csv-step-content code {
+            background: white;
+            padding: 0.125rem 0.375rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: var(--secondary);
+        }
+        
+        .csv-example {
+            margin-bottom: 1.5rem;
+        }
+        
+        .csv-example h5 {
             color: var(--primary);
             margin-bottom: 0.75rem;
             font-size: 1rem;
         }
         
-        .upload-template code {
-            display: block;
-            background: white;
-            padding: 1rem;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 0.875rem;
-            color: #555;
+        .csv-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
             border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .csv-table th {
+            background: var(--primary);
+            color: white;
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 500;
+        }
+        
+        .csv-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .csv-table tr:nth-child(even) {
+            background: var(--light);
+        }
+        
+        .csv-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .csv-table em {
+            color: #999;
+            font-style: italic;
+        }
+        
+        .csv-note {
+            background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+            border-left: 4px solid var(--success);
+            padding: 1rem 1.25rem;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .csv-note p {
+            margin: 0;
+            color: #2e5c3e;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        @media (max-width: 768px) {
+            .csv-steps {
+                grid-template-columns: 1fr;
+            }
         }
 
         /* Message Type Selection */
@@ -1506,6 +1614,8 @@
     <!-- Upload Section -->
     <section class="section upload-section" id="upload">
         <h2>Upload Your Guest List</h2>
+        <p style="text-align: center; color: #666; margin-bottom: 2rem;">Upload a simple spreadsheet with your guests and their gifts</p>
+        
         <div class="upload-container">
             <div class="upload-box" id="uploadBox">
                 <div class="upload-icon">📄</div>
@@ -1515,9 +1625,74 @@
                 <button class="btn" onclick="document.getElementById('fileInput').click()">Select File</button>
             </div>
             
-            <div class="upload-template">
-                <h4>Required CSV Format:</h4>
-                <code>Name,Gift,Message<br>Michael,Cash gift,Thank you for...<br>Janet and Stacey,Target gift card,We love...<br>Mr. and Mrs. Smith,Kitchen mixer,The mixer...</code>
+            <!-- CSV Guide -->
+            <div class="csv-guide">
+                <h4>📋 How to Create Your Guest List</h4>
+                
+                <div class="csv-steps">
+                    <div class="csv-step">
+                        <div class="csv-step-num">1</div>
+                        <div class="csv-step-content">
+                            <strong>Open a spreadsheet</strong>
+                            <p>Use Excel, Google Sheets, or Numbers</p>
+                        </div>
+                    </div>
+                    <div class="csv-step">
+                        <div class="csv-step-num">2</div>
+                        <div class="csv-step-content">
+                            <strong>Add three column headers</strong>
+                            <p>Type these exactly: <code>Name</code>, <code>Gift</code>, <code>Message</code></p>
+                        </div>
+                    </div>
+                    <div class="csv-step">
+                        <div class="csv-step-num">3</div>
+                        <div class="csv-step-content">
+                            <strong>Fill in your guests</strong>
+                            <p>One guest per row. Message column can be left blank if using AI!</p>
+                        </div>
+                    </div>
+                    <div class="csv-step">
+                        <div class="csv-step-num">4</div>
+                        <div class="csv-step-content">
+                            <strong>Save as CSV</strong>
+                            <p>File → Download → CSV (Comma Separated Values)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="csv-example">
+                    <h5>Example:</h5>
+                    <table class="csv-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Gift</th>
+                                <th>Message</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Michael Johnson</td>
+                                <td>Cash gift - $200</td>
+                                <td><em>(leave blank for AI)</em></td>
+                            </tr>
+                            <tr>
+                                <td>Janet and Stacey Miller</td>
+                                <td>Target gift card - $50</td>
+                                <td><em>(leave blank for AI)</em></td>
+                            </tr>
+                            <tr>
+                                <td>Mr. and Mrs. Smith</td>
+                                <td>KitchenAid Stand Mixer</td>
+                                <td>Thank you for the mixer!</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="csv-note">
+                    <p>💡 <strong>Message column is optional!</strong> If you want us to write personalized messages with AI, just leave that column blank. We'll generate unique thank you notes based on each guest's gift.</p>
+                </div>
             </div>
         </div>
     </section>
