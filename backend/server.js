@@ -287,7 +287,7 @@ app.post('/api/projects/:id/generate-ai-messages', authenticate, async (req, res
   });
 });
 
-// Stripe payment
+// Stripe payment - authenticated
 app.post('/api/create-payment', authenticate, async (req, res) => {
   const { projectId, plan } = req.body;
   
@@ -307,7 +307,48 @@ app.post('/api/create-payment', authenticate, async (req, res) => {
   }
 });
 
-// Confirm payment and generate PDF
+// Simple guest checkout - no auth required
+app.post('/api/create-payment-intent', async (req, res) => {
+  const { plan, email, guests, template } = req.body;
+  
+  const prices = { starter: 1900, premium: 3900, unlimited: 7900 };
+  const amount = prices[plan];
+  
+  if (!amount) {
+    return res.status(400).json({ error: 'Invalid plan' });
+  }
+  
+  try {
+    // Create temporary project
+    const projectId = uuidv4();
+    
+    // Store in temporary memory (or could use temp DB table)
+    global.tempProjects = global.tempProjects || {};
+    global.tempProjects[projectId] = {
+      email,
+      guests,
+      template: template || 'classic',
+      cardsPerPage: 4,
+      createdAt: Date.now()
+    };
+    
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount,
+      currency: 'usd',
+      metadata: { 
+        projectId,
+        email,
+        guestCount: guests?.length || 0
+      }
+    });
+    
+    res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Confirm payment and generate PDF - authenticated
 app.post('/api/confirm-payment', authenticate, async (req, res) => {
   const { projectId, paymentIntentId } = req.body;
   
@@ -333,6 +374,40 @@ app.post('/api/confirm-payment', authenticate, async (req, res) => {
     } else {
       res.status(400).json({ error: 'Payment not successful' });
     }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Simple confirm payment - no auth required (guest checkout)
+app.post('/api/confirm-payment-simple', async (req, res) => {
+  const { paymentIntentId, email } = req.body;
+  
+  try {
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    
+    if (paymentIntent.status !== 'succeeded') {
+      return res.status(400).json({ error: 'Payment not successful' });
+    }
+    
+    const { projectId } = paymentIntent.metadata;
+    const tempProject = global.tempProjects?.[projectId];
+    
+    if (!tempProject) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+    
+    // Generate PDF directly from temp data (no DB needed)
+    const pdfPath = await generatePDFSimple(tempProject, projectId);
+    const pdfUrl = `/pdfs/${path.basename(pdfPath)}`;
+    
+    // Send email with download link
+    await sendDownloadEmail(email, projectId, pdfUrl);
+    
+    // Clean up temp data
+    delete global.tempProjects[projectId];
+    
+    res.json({ success: true, pdfUrl });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -377,6 +452,86 @@ async function sendDownloadEmail(email, projectId, pdfUrl) {
   } catch (error) {
     console.error('Error sending email:', error);
   }
+}
+
+// Generate PDF without database (for guest checkout)
+async function generatePDFSimple(project, projectId) {
+  const cards = project.guests.map(g => ({
+    recipient_name: g.name,
+    gift: g.gift,
+    message: g.message || `Thank you for your thoughtful gift${g.gift ? ` of ${g.gift}` : ''}. Your generosity means the world to us as we begin this new chapter together.`
+  }));
+  
+  const template = templates[project.template] || templates.classic;
+  const cardsPerPage = project.cardsPerPage || 4;
+  const pdfPath = path.join(__dirname, 'pdfs', `project-${projectId}.pdf`);
+  
+  if (!fs.existsSync(path.join(__dirname, 'pdfs'))) {
+    fs.mkdirSync(path.join(__dirname, 'pdfs'));
+  }
+  
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  
+  // Calculate dimensions based on cards per page
+  let gridStyles, cardStyles;
+  
+  if (cardsPerPage === 1) {
+    gridStyles = 'grid-template-columns: 1fr; grid-template-rows: 1fr;';
+    cardStyles = 'width: 7in; height: 9in; padding: 0.75in;';
+  } else if (cardsPerPage === 2) {
+    gridStyles = 'grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; gap: 0.5in; padding: 0.5in;';
+    cardStyles = 'width: 7.5in; height: 4.5in; padding: 0.4in;';
+  } else {
+    gridStyles = 'grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 0; padding: 0;';
+    cardStyles = 'width: 4.25in; height: 5.5in; padding: 0.4in;';
+  }
+  
+  let htmlContent = `
+    <html>
+    <head>
+      <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+      <style>
+        @page { size: letter; margin: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Cormorant Garamond', serif; }
+        .sheet { width: 8.5in; height: 11in; display: grid; ${gridStyles} page-break-after: always; }
+        .card { display: flex; flex-direction: column; justify-content: center; position: relative; ${cardStyles} }
+        ${template.styles}
+      </style>
+    </head>
+    <body>
+  `;
+  
+  for (let i = 0; i < cards.length; i += cardsPerPage) {
+    htmlContent += '<div class="sheet">';
+    for (let j = i; j < i + cardsPerPage && j < cards.length; j++) {
+      const card = cards[j];
+      htmlContent += `
+        <div class="card">
+          <div class="header">Thank You</div>
+          <div class="recipient">Dear ${card.recipient_name},</div>
+          <div class="message">${card.message}</div>
+          <div class="signature">
+            <div class="signature-text">With appreciation,</div>
+            <div class="names">Collin and Annika</div>
+          </div>
+        </div>
+      `;
+    }
+    for (let j = cards.length; j < i + cardsPerPage; j++) {
+      htmlContent += '<div class="card"></div>';
+    }
+    htmlContent += '</div>';
+  }
+  
+  htmlContent += '</body></html>';
+  
+  await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+  await page.pdf({ path: pdfPath, format: 'letter', printBackground: true });
+  await browser.close();
+  
+  return pdfPath;
 }
 
 // Generate PDF with configurable cards per page
