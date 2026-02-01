@@ -4,6 +4,7 @@
 let currentState = {
     step: 1,
     template: null,
+    cardsPerPage: 4,
     guests: [],
     messageType: null, // 'prewritten' or 'ai'
     tone: null,
@@ -65,6 +66,35 @@ function initTemplateSelection() {
             updateProgressBar();
         });
     });
+}
+
+// Cards Per Page Selection
+function selectCardsPerPage(value) {
+    currentState.cardsPerPage = value;
+    
+    // Update UI
+    document.querySelectorAll('.cards-per-page-option').forEach(opt => {
+        opt.classList.remove('selected');
+        opt.style.background = '';
+        opt.style.borderColor = '';
+        opt.style.color = '';
+    });
+    
+    const selected = document.querySelector(`.cards-per-page-option[data-value="${value}"]`);
+    if (selected) {
+        selected.classList.add('selected');
+        selected.style.background = '#5c4a3d';
+        selected.style.borderColor = '#5c4a3d';
+        selected.style.color = 'white';
+    }
+    
+    // Update description
+    const descriptions = {
+        1: 'Large cards - Perfect for detailed messages. Cards are 7" x 9"',
+        2: 'Medium cards - Good balance of size and efficiency. Cards are 7.5" x 4.5"',
+        4: 'Standard - Perfect for most home printers. Cards are 4.25" x 5.5"'
+    };
+    document.getElementById('cardsPerPageDescription').textContent = descriptions[value];
 }
 
 // Show/Hide Sections

@@ -324,6 +324,22 @@
         .template-card.selected .template-check {
             opacity: 1;
         }
+
+        /* Cards Per Page Selector */
+        .cards-per-page-option {
+            transition: all 0.3s ease;
+        }
+
+        .cards-per-page-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .cards-per-page-option.selected {
+            background: var(--primary) !important;
+            border-color: var(--primary) !important;
+            color: white !important;
+        }
         
         /* Upload Section */
         .upload-section {
@@ -1305,6 +1321,31 @@
                     <h4>Minimal</h4>
                     <p>Simple & clean</p>
                 </div>
+            </div>
+        </div>
+
+        <!-- Cards Per Page Selector -->
+        <div style="text-align: center; margin-top: 2rem; padding: 2rem; background: var(--white); border-radius: 12px; max-width: 600px; margin-left: auto; margin-right: auto;">
+            <h3 style="color: var(--primary); margin-bottom: 1rem; font-size: 1.25rem;">How many cards per page?</h3>
+            <p style="color: #666; margin-bottom: 1.5rem; font-size: 0.95rem;">Choose your preferred print layout</p>
+            
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <div class="cards-per-page-option" data-value="1" onclick="selectCardsPerPage(1)" style="padding: 1rem 1.5rem; border: 2px solid var(--accent); border-radius: 8px; cursor: pointer; transition: all 0.3s; text-align: center; min-width: 100px;">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">1</div>
+                    <div style="font-size: 0.85rem; color: #666;">Large Cards</div>
+                </div>
+                <div class="cards-per-page-option" data-value="2" onclick="selectCardsPerPage(2)" style="padding: 1rem 1.5rem; border: 2px solid var(--accent); border-radius: 8px; cursor: pointer; transition: all 0.3s; text-align: center; min-width: 100px;">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">2</div>
+                    <div style="font-size: 0.85rem; color: #666;">Medium Cards</div>
+                </div>
+                <div class="cards-per-page-option selected" data-value="4" onclick="selectCardsPerPage(4)" style="padding: 1rem 1.5rem; border: 2px solid var(--accent); border-radius: 8px; cursor: pointer; transition: all 0.3s; text-align: center; min-width: 100px; background: var(--primary); border-color: var(--primary); color: white;">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">4</div>
+                    <div style="font-size: 0.85rem; color: inherit;">Standard</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 1rem; padding: 0.75rem; background: var(--light); border-radius: 8px; font-size: 0.85rem; color: #666;">
+                <span id="cardsPerPageDescription">Perfect for most home printers. Cards are 4.25" x 5.5"</span>
             </div>
         </div>
 
