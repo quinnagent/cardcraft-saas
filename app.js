@@ -268,33 +268,37 @@ async function handleFile(file) {
         <p>${file.name}</p>
     `;
     
-    // Simulate backend upload with validation
-    const formData = new FormData();
-    formData.append('file', file);
-    
     try {
-        // For demo, we simulate the backend validation
-        await simulateCSVValidation(file);
+        // Parse CSV and get actual guest count
+        const { guests, rowCount, errors } = await parseCSV(file);
+        
+        if (errors.length > 0) {
+            throw new Error(errors[0]);
+        }
+        
+        if (guests.length === 0) {
+            throw new Error('No valid guests found in CSV');
+        }
         
         uploadBox.innerHTML = `
             <div class="upload-icon">✓</div>
             <h3>File uploaded successfully!</h3>
             <p>${file.name}</p>
-            <p style="color: #666; font-size: 0.9rem; margin-top: 1rem;">Processing ${sampleGuests.length} guests...</p>
+            <p style="color: #666; font-size: 0.9rem; margin-top: 1rem;">Found ${guests.length} guest${guests.length === 1 ? '' : 's'}...</p>
         `;
         
-        // Simulate processing delay
+        // Store actual guests from CSV
+        currentState.guests = guests;
+        
+        // Route based on message type choice
         setTimeout(() => {
-            currentState.guests = [...sampleGuests];
-            
-            // Route based on message type choice
             if (currentState.messageType === 'prewritten') {
                 generatePrewrittenMessages();
                 showPreviewExamples();
             } else {
                 showSection('aiGeneration');
             }
-        }, 1500);
+        }, 1000);
         
     } catch (error) {
         uploadBox.innerHTML = `
@@ -314,7 +318,7 @@ async function handleFile(file) {
     }
 }
 
-function simulateCSVValidation(file) {
+function parseCSV(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -322,18 +326,40 @@ function simulateCSVValidation(file) {
             const lines = text.split('\n').filter(line => line.trim());
             
             if (lines.length < 2) {
-                reject(new Error('CSV file is empty or has no data rows'));
+                resolve({ guests: [], rowCount: 0, errors: ['CSV file is empty or has no data rows'] });
                 return;
             }
             
-            const headers = lines[0].toLowerCase().split(',').map(h => h.trim());
+            const headers = lines[0].toLowerCase().split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+            const nameIndex = headers.indexOf('name');
+            const giftIndex = headers.indexOf('gift');
+            const messageIndex = headers.indexOf('message');
             
-            if (!headers.includes('name') || !headers.includes('gift')) {
-                reject(new Error('CSV must have "Name" and "Gift" columns'));
+            if (nameIndex === -1 || giftIndex === -1) {
+                resolve({ guests: [], rowCount: 0, errors: ['CSV must have "Name" and "Gift" columns'] });
                 return;
             }
             
-            resolve();
+            const guests = [];
+            const errors = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                
+                // Simple CSV parsing (handles basic quoted fields)
+                const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+                
+                const name = values[nameIndex];
+                const gift = values[giftIndex];
+                const message = messageIndex !== -1 ? values[messageIndex] : '';
+                
+                if (name && gift) {
+                    guests.push({ name, gift, message });
+                }
+            }
+            
+            resolve({ guests, rowCount: lines.length - 1, errors });
         };
         reader.onerror = () => reject(new Error('Could not read file'));
         reader.readAsText(file);
