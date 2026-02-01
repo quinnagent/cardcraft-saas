@@ -669,10 +669,64 @@
             font-size: 0.95rem;
             line-height: 1.6;
         }
+
+        /* Navigation Buttons */
+        .section-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 600px;
+            margin: 2rem auto 0;
+            padding-top: 2rem;
+            border-top: 1px solid var(--accent);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-back {
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--primary);
+        }
+
+        .btn-back:hover {
+            background: var(--accent);
+            color: var(--primary);
+        }
+
+        .btn-home {
+            background: transparent;
+            color: var(--secondary);
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-home:hover {
+            color: var(--primary);
+            background: transparent;
+            transform: none;
+        }
+
+        .section-nav-center {
+            justify-content: center;
+        }
         
         @media (max-width: 768px) {
             .csv-steps {
                 grid-template-columns: 1fr;
+            }
+
+            .section-nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-buttons {
+                width: 100%;
+                justify-content: center;
             }
         }
 
@@ -1175,6 +1229,14 @@
             gap: 0.5rem;
             font-size: 0.9rem;
             color: #888;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .progress-step:hover {
+            background: rgba(92, 74, 61, 0.05);
         }
 
         .progress-step.active {
@@ -1184,6 +1246,15 @@
 
         .progress-step.completed {
             color: var(--success);
+        }
+
+        .progress-step.disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .progress-step.disabled:hover {
+            background: transparent;
         }
 
         .progress-step-number {
@@ -1373,23 +1444,23 @@
     <!-- Progress Bar (hidden initially) -->
     <div class="progress-bar" id="progressBar" style="display: none;">
         <div class="progress-steps">
-            <div class="progress-step active" data-step="1">
+            <div class="progress-step active" data-step="1" onclick="goToStep(1)">
                 <span class="progress-step-number">1</span>
                 <span>Template</span>
             </div>
-            <div class="progress-step" data-step="2">
+            <div class="progress-step" data-step="2" onclick="goToStep(2)">
                 <span class="progress-step-number">2</span>
                 <span>Upload</span>
             </div>
-            <div class="progress-step" data-step="3">
+            <div class="progress-step" data-step="3" onclick="goToStep(3)">
                 <span class="progress-step-number">3</span>
                 <span>Messages</span>
             </div>
-            <div class="progress-step" data-step="4">
+            <div class="progress-step" data-step="4" onclick="goToStep(4)">
                 <span class="progress-step-number">4</span>
                 <span>Preview</span>
             </div>
-            <div class="progress-step" data-step="5">
+            <div class="progress-step" data-step="5" onclick="goToStep(5)">
                 <span class="progress-step-number">5</span>
                 <span>Payment</span>
             </div>
@@ -1609,6 +1680,10 @@
             <button class="btn btn-large" id="templateContinue" onclick="goToUpload()">Continue to Upload</button>
             <p id="templateError" style="color: #c44; margin-top: 0.75rem; font-size: 0.9rem; display: none;">Please select a template first</p>
         </div>
+
+        <div class="section-nav section-nav-center">
+            <button class="btn btn-home" onclick="goHome()">← Back to Home</button>
+        </div>
     </section>
 
     <!-- Upload Section -->
@@ -1695,6 +1770,11 @@
                 </div>
             </div>
         </div>
+
+        <div class="section-nav">
+            <button class="btn btn-back" onclick="goToStep(1)">← Back to Templates</button>
+            <button class="btn btn-home" onclick="goHome()">← Back to Home</button>
+        </div>
     </section>
 
     <!-- Message Type Selection -->
@@ -1727,6 +1807,11 @@
                 </ul>
             </div>
         </div>
+
+        <div class="section-nav">
+            <button class="btn btn-back" onclick="goToStep(2)">← Back to Upload</button>
+            <button class="btn btn-home" onclick="goHome()">← Back to Home</button>
+        </div>
     </section>
 
     <!-- AI Generation Section -->
@@ -1753,6 +1838,11 @@
                 <p style="font-size: 0.9rem; color: #888; margin-top: 0.5rem;">This may take a moment</p>
             </div>
         </div>
+
+        <div class="section-nav">
+            <button class="btn btn-back" onclick="goToStep(3)">← Back to Message Type</button>
+            <button class="btn btn-home" onclick="goHome()">← Back to Home</button>
+        </div>
     </section>
 
     <!-- Simple Edit List Section (for AI messages) -->
@@ -1766,6 +1856,11 @@
         
         <div style="text-align: center; margin-top: 2rem;">
             <button class="btn btn-large" onclick="showPreviewExamples()">Continue to Preview</button>
+        </div>
+
+        <div class="section-nav">
+            <button class="btn btn-back" onclick="goToStep(3)">← Back to Message Type</button>
+            <button class="btn btn-home" onclick="goHome()">← Back to Home</button>
         </div>
     </section>
 
@@ -1782,6 +1877,11 @@
             <h3>Ready to see all your cards?</h3>
             <p>You have <strong id="totalCardCount">45</strong> personalized cards ready to download. Unlock them now!</p>
             <button class="btn btn-large" onclick="showSection('pricing')" style="margin-top: 1rem;">Unlock All Cards</button>
+        </div>
+
+        <div class="section-nav">
+            <button class="btn btn-back" onclick="goToStep(3)">← Back to Messages</button>
+            <button class="btn btn-home" onclick="goHome()">← Back to Home</button>
         </div>
     </section>
 
@@ -1830,6 +1930,11 @@
                 </ul>
                 <button class="btn btn-outline" onclick="openPayment('unlimited')">Get Started</button>
             </div>
+        </div>
+
+        <div class="section-nav">
+            <button class="btn btn-back" onclick="goToStep(4)">← Back to Preview</button>
+            <button class="btn btn-home" onclick="goHome()">← Back to Home</button>
         </div>
     </section>
 

@@ -169,9 +169,54 @@ function goToUpload() {
         }
         return;
     }
-    currentState.step = 2;
+    goToStep(2);
+}
+
+function goToStep(stepNum) {
+    // Define the section mapping
+    const stepSections = {
+        1: 'templates',
+        2: 'upload',
+        3: 'messageType',
+        4: 'previewExamples',
+        5: 'pricing'
+    };
+
+    // Check if we can navigate to this step
+    // Allow navigation to completed steps or the next available step
+    const maxAvailableStep = currentState.template ? (currentState.guests.length > 0 ? 5 : 2) : 1;
+    
+    // If going to step 3, check if we need to show messageType, aiGeneration, or simpleEdit
+    if (stepNum === 3) {
+        if (currentState.messageType === 'ai' && currentState.generatedMessages.length > 0) {
+            showSection('simpleEdit');
+            return;
+        } else if (currentState.messageType === 'ai') {
+            showSection('aiGeneration');
+            return;
+        }
+    }
+
+    currentState.step = stepNum;
     updateProgressBar();
-    showSection('upload');
+    showSection(stepSections[stepNum]);
+}
+
+function goHome() {
+    // Hide all sections
+    document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+    });
+    
+    // Hide progress bar
+    document.getElementById('progressBar').style.display = 'none';
+    
+    // Reset step
+    currentState.step = 1;
+    updateProgressBar();
+    
+    // Scroll to hero
+    document.getElementById('hero').scrollIntoView({ behavior: 'smooth' });
 }
 
 // File Upload
