@@ -38,33 +38,49 @@ async function generateMessageWithAI(guest, tone) {
 
   const prompt = `Write a ${tone} wedding thank you note to ${guest.name} who gave a ${guest.gift}. Keep it 2-3 sentences, warm and personal.`;
 
-  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-      'HTTP-Referer': 'https://cardcraft.app',
-      'X-Title': 'CardCraft'
-    },
-    body: JSON.stringify({
-      model: 'moonshotai/kimi-k2.5',
-      messages: [
-        { role: 'system', content: 'You are a helpful assistant that writes personalized wedding thank you notes.' },
-        { role: 'user', content: prompt }
-      ],
-      max_tokens: 200,
-      temperature: 0.8
-    })
-  });
+  console.log('Calling OpenRouter API for:', guest.name);
 
-  if (!response.ok) {
-    const errorData = await response.text();
-    console.error('OpenRouter API error:', errorData);
-    throw new Error(`OpenRouter API error: ${response.status}`);
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'HTTP-Referer': 'https://cardcraft.app',
+        'X-Title': 'CardCraft'
+      },
+      body: JSON.stringify({
+        model: 'moonshotai/kimi-k2.5',
+        messages: [
+          { role: 'system', content: 'You are a helpful assistant that writes personalized wedding thank you notes.' },
+          { role: 'user', content: prompt }
+        ],
+        max_tokens: 200,
+        temperature: 0.8
+      })
+    });
+
+    console.log('OpenRouter response status:', response.status);
+
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error('OpenRouter API error response:', errorData);
+      throw new Error(`OpenRouter API error: ${response.status} - ${errorData}`);
+    }
+
+    const data = await response.json();
+    console.log('OpenRouter response received');
+    
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error('Unexpected OpenRouter response:', JSON.stringify(data));
+      throw new Error('Invalid response from OpenRouter');
+    }
+    
+    return data.choices[0].message.content.trim();
+  } catch (error) {
+    console.error('OpenRouter fetch error:', error.message);
+    throw error;
   }
-
-  const data = await response.json();
-  return data.choices[0].message.content.trim();
 }
 
 // CORS configuration - allow all origins for now
