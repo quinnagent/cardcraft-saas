@@ -256,6 +256,23 @@
             padding: 1rem 2rem;
             font-size: 1.1rem;
         }
+
+        .ai-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
         
         /* Hero Section */
         .hero {
@@ -1469,11 +1486,12 @@
 
     <!-- Hero Section -->
     <section class="hero" id="hero">
+        <div class="ai-badge">✨ Now with AI-Powered Messages</div>
         <h1>Wedding Thank You Cards<br>Made Beautifully Simple</h1>
-        <p>Choose from 10 elegant templates, upload your guest list, and generate personalized thank you cards in minutes. Print at home or send to a professional printer.</p>
+        <p>Choose from 10 elegant templates, upload your guest list, and let our AI write personalized thank you cards for each guest. Or use our pre-written templates. Print at home in minutes.</p>
         <div class="hero-cta">
-            <a href="#templates" class="btn" onclick="showSection('templates')">Browse Templates</a>
-            <a href="#upload" class="btn" onclick="startCreating()">Start Creating</a>
+            <a href="#messageType" class="btn btn-large" onclick="startCreating()" style="background: linear-gradient(135deg, var(--primary) 0%, #7a5a4a 100%);">🚀 Start with AI</a>
+            <a href="#templates" class="btn btn-outline" onclick="showSection('templates')">Browse Templates</a>
         </div>
     </section>
 
@@ -1487,14 +1505,14 @@
                 <p>Browse our collection of 10 elegant designs crafted by professional stationers</p>
             </div>
             <div class="step">
-                <div class="step-number">2</div>
-                <h3>Upload List</h3>
-                <p>Upload a CSV with guest names and gifts. Choose pre-written or AI-assisted messages</p>
+                <div class="step-number" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">2</div>
+                <h3>Pick AI or Pre-Written ✨</h3>
+                <p>Let our AI write unique, personalized messages for each guest. Or choose elegant pre-written templates.</p>
             </div>
             <div class="step">
                 <div class="step-number">3</div>
-                <h3>Personalize</h3>
-                <p>Edit your messages with our simple list view or preview the full cards</p>
+                <h3>Upload Guests</h3>
+                <p>Upload your guest list with names and gifts. We'll match everything perfectly.</p>
             </div>
             <div class="step">
                 <div class="step-number">4</div>
@@ -1677,7 +1695,7 @@
         </div>
 
         <div style="text-align: center; margin-top: 3rem;">
-            <button class="btn btn-large" id="templateContinue" onclick="goToUpload()">Continue to Upload</button>
+            <button class="btn btn-large" id="templateContinue" onclick="goToMessageType()" style="background: linear-gradient(135deg, var(--primary) 0%, #7a5a4a 100%);">✨ Continue to AI Messages</button>
             <p id="templateError" style="color: #c44; margin-top: 0.75rem; font-size: 0.9rem; display: none;">Please select a template first</p>
         </div>
 
@@ -1772,7 +1790,7 @@
         </div>
 
         <div class="section-nav">
-            <button class="btn btn-back" onclick="goToStep(1)">← Back to Templates</button>
+            <button class="btn btn-back" onclick="goToStep(2)">← Back to Message Style</button>
             <button class="btn btn-home" onclick="goHome()">← Back to Home</button>
         </div>
     </section>
@@ -1809,7 +1827,7 @@
         </div>
 
         <div class="section-nav">
-            <button class="btn btn-back" onclick="goToStep(2)">← Back to Upload</button>
+            <button class="btn btn-back" onclick="goToStep(1)">← Back to Templates</button>
             <button class="btn btn-home" onclick="goHome()">← Back to Home</button>
         </div>
     </section>
@@ -1840,7 +1858,7 @@
         </div>
 
         <div class="section-nav">
-            <button class="btn btn-back" onclick="goToStep(3)">← Back to Message Type</button>
+            <button class="btn btn-back" onclick="goToStep(3)">← Back to Upload</button>
             <button class="btn btn-home" onclick="goHome()">← Back to Home</button>
         </div>
     </section>
@@ -1859,7 +1877,7 @@
         </div>
 
         <div class="section-nav">
-            <button class="btn btn-back" onclick="goToStep(3)">← Back to Message Type</button>
+            <button class="btn btn-back" onclick="goToStep(4)">← Back to AI Generation</button>
             <button class="btn btn-home" onclick="goHome()">← Back to Home</button>
         </div>
     </section>
@@ -1880,7 +1898,7 @@
         </div>
 
         <div class="section-nav">
-            <button class="btn btn-back" onclick="goToStep(3)">← Back to Messages</button>
+            <button class="btn btn-back" onclick="goToStep(4)">← Back to Upload/Messages</button>
             <button class="btn btn-home" onclick="goHome()">← Back to Home</button>
         </div>
     </section>
@@ -1933,7 +1951,7 @@
         </div>
 
         <div class="section-nav">
-            <button class="btn btn-back" onclick="goToStep(4)">← Back to Preview</button>
+            <button class="btn btn-back" onclick="goToStep(5)">← Back to Preview</button>
             <button class="btn btn-home" onclick="goHome()">← Back to Home</button>
         </div>
     </section>

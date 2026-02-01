@@ -156,9 +156,10 @@ function updateProgressBar() {
 
 function startCreating() {
     showSection('templates');
+    document.getElementById('progressBar').style.display = 'block';
 }
 
-function goToUpload() {
+function goToMessageType() {
     if (!currentState.template) {
         const errorMsg = document.getElementById('templateError');
         if (errorMsg) {
@@ -169,32 +170,38 @@ function goToUpload() {
         }
         return;
     }
-    goToStep(2);
+    currentState.step = 2;
+    updateProgressBar();
+    showSection('messageType');
+}
+
+function goToUpload() {
+    currentState.step = 3;
+    updateProgressBar();
+    showSection('upload');
 }
 
 function goToStep(stepNum) {
-    // Define the section mapping
+    // Define the section mapping for new flow:
+    // 1: Templates, 2: Message Type, 3: Upload, 4: AI/Preview, 5: Pricing
     const stepSections = {
         1: 'templates',
-        2: 'upload',
-        3: 'messageType',
+        2: 'messageType',
+        3: 'upload',
         4: 'previewExamples',
         5: 'pricing'
     };
 
-    // Check if we can navigate to this step
-    // Allow navigation to completed steps or the next available step
-    const maxAvailableStep = currentState.template ? (currentState.guests.length > 0 ? 5 : 2) : 1;
-    
-    // If going to step 3, check if we need to show messageType, aiGeneration, or simpleEdit
-    if (stepNum === 3) {
-        if (currentState.messageType === 'ai' && currentState.generatedMessages.length > 0) {
-            showSection('simpleEdit');
-            return;
-        } else if (currentState.messageType === 'ai') {
+    // If going to step 4 (messages/preview), check what to show
+    if (stepNum === 4) {
+        if (currentState.messageType === 'ai' && currentState.generatedMessages.length === 0) {
             showSection('aiGeneration');
             return;
+        } else if (currentState.messageType === 'ai' && currentState.generatedMessages.length > 0) {
+            showSection('simpleEdit');
+            return;
         }
+        // Pre-written goes to preview
     }
 
     currentState.step = stepNum;
@@ -270,9 +277,18 @@ function handleFile(file) {
     // Simulate processing delay
     setTimeout(() => {
         currentState.guests = [...sampleGuests];
-        currentState.step = 3;
-        updateProgressBar();
-        showSection('messageType');
+        
+        // Route based on message type choice
+        if (currentState.messageType === 'prewritten') {
+            generatePrewrittenMessages();
+            currentState.step = 4;
+            updateProgressBar();
+            showSection('previewExamples');
+        } else {
+            currentState.step = 4;
+            updateProgressBar();
+            showSection('aiGeneration');
+        }
     }, 1500);
 }
 
@@ -286,14 +302,8 @@ function selectMessageType(type) {
     event.currentTarget.classList.add('selected');
     
     setTimeout(() => {
-        if (type === 'prewritten') {
-            // Generate pre-written messages and go to preview
-            generatePrewrittenMessages();
-            showSection('previewExamples');
-        } else {
-            // Show AI generation options
-            showSection('aiGeneration');
-        }
+        // Both paths now go to upload first, then handle messages
+        goToUpload();
     }, 300);
 }
 
