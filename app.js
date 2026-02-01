@@ -34,23 +34,6 @@ const prewrittenTemplates = {
     "default": "What a wonderful celebration we had, and having you there made it even more special! Your thoughtful gift means so much to us as we begin this new chapter. We're so grateful for your presence and your generosity. Thank you from the bottom of our hearts!"
 };
 
-// AI message generator (mock - replace with actual API call)
-async function generateAIMessage(guest, tone) {
-    // In production, this would call your backend API which uses OpenAI/Anthropic
-    // For demo, return mock messages based on tone
-    const toneMessages = {
-        warm: `Dear ${guest.name},\n\nWe can't thank you enough for being part of our special day and for your incredibly thoughtful ${guest.gift.toLowerCase()}. It means the world to us that you took the time to celebrate with us, and your generosity has touched our hearts deeply. We're so grateful to have you in our lives!\n\nWith love and appreciation,\nCollin and Annika`,
-        
-        formal: `Dear ${guest.name},\n\nWe wish to express our sincere gratitude for your presence at our wedding and for your generous gift of ${guest.gift.toLowerCase()}. Your thoughtfulness is deeply appreciated as we begin our married life together. We are honored to have shared this special occasion with you.\n\nWith warm regards,\nCollin and Annika`,
-        
-        casual: `Hey ${guest.name.split(' ')[0]}!\n\nThanks so much for coming to our wedding and for the awesome ${guest.gift.toLowerCase()}! We had such a blast celebrating with you. Your gift is going to be so useful as we set up our new place together. Really appreciate you being there!\n\nThanks again,\nCollin and Annika`,
-        
-        poetic: `Dearest ${guest.name},\n\nLike stars that light the evening sky,\nYour presence made our wedding shine.\nYour gift of ${guest.gift.toLowerCase()}, so thoughtful and kind,\nFills our hearts with joy divine.\n\nThank you for sharing in our love's sweet story,\nAnd for being part of our forever.\n\nWith eternal gratitude,\nCollin and Annika`
-    };
-    
-    return toneMessages[tone] || toneMessages.warm;
-}
-
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     initTemplateSelection();
@@ -404,29 +387,45 @@ async function generateAIMessages() {
     loadingDiv.classList.add('active');
     generateBtn.disabled = true;
     
-    // Simulate AI generation
-    const generatedMessages = [];
-    for (let i = 0; i < currentState.guests.length; i++) {
-        const message = await generateAIMessage(currentState.guests[i], currentState.tone);
-        generatedMessages.push({
-            ...currentState.guests[i],
-            message: message
+    try {
+        // Call backend API to generate AI messages
+        const response = await fetch(`${API_URL}/projects/${currentState.projectId || 1}/generate-ai-messages`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${currentState.token || 'demo-token'}`
+            },
+            body: JSON.stringify({ tone: currentState.tone })
         });
         
-        // Add small delay for realism
-        await new Promise(resolve => setTimeout(resolve, 200));
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to generate AI messages');
+        }
+        
+        const data = await response.json();
+        
+        // Update guests with AI-generated messages
+        currentState.generatedMessages = data.cards;
+        currentState.guests = data.cards.map(card => ({
+            name: card.recipient_name,
+            gift: card.gift,
+            message: card.message
+        }));
+        
+        // Populate edit list
+        populateEditList();
+        
+        // Go to simple edit view
+        showSection('simpleEdit');
+        
+    } catch (error) {
+        alert('Error: ' + error.message + '\n\nPlease try again or write your own messages.');
+        console.error('AI generation error:', error);
+    } finally {
+        loadingDiv.classList.remove('active');
+        generateBtn.disabled = false;
     }
-    
-    currentState.generatedMessages = generatedMessages;
-    currentState.guests = generatedMessages;
-    
-    loadingDiv.classList.remove('active');
-    
-    // Populate edit list
-    populateEditList();
-    
-    // Go to simple edit view
-    showSection('simpleEdit');
 }
 
 // Simple Edit List
