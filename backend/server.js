@@ -29,6 +29,21 @@ const emailTransporter = nodemailer.createTransport({
   }
 });
 
+// Fallback message generator when AI fails
+function generateFallbackMessage(guest, tone) {
+  const gift = guest.gift || 'gift';
+  const name = guest.name || 'friend';
+  
+  const templates = {
+    warm: `Dear ${name}, thank you so much for your generous ${gift}. Your thoughtfulness means the world to us as we start our new life together. We're so grateful you could share in our special day!`,
+    formal: `Dear ${name}, we extend our sincere gratitude for your generous ${gift}. Your presence at our wedding was deeply appreciated, and your gift will help us build our future together. With warm regards,`,
+    casual: `Hey ${name}! Thanks a ton for the awesome ${gift}! We had such a blast at the wedding and loved having you there. Can't wait to use your gift in our new place!`,
+    poetic: `Dearest ${name}, your ${gift} arrived like a gentle blessing, weaving warmth into the tapestry of our new beginning. We are forever grateful for your love and presence on our special day.`
+  };
+  
+  return templates[tone] || templates.warm;
+}
+
 // LLM Integration with OpenRouter
 async function generateMessageWithAI(guest, tone) {
   const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
@@ -90,13 +105,15 @@ async function generateMessageWithAI(guest, tone) {
     
     if (!content) {
       console.error('No content in OpenRouter response:', JSON.stringify(choice));
-      throw new Error('Empty response from AI model');
+      // Return a fallback message instead of throwing
+      return generateFallbackMessage(guest, tone);
     }
     
     return content.trim();
   } catch (error) {
     console.error('OpenRouter fetch error:', error.message);
-    throw error;
+    // Return fallback message on any error
+    return generateFallbackMessage(guest, tone);
   }
 }
 
