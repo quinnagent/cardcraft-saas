@@ -114,11 +114,12 @@ app.post('/api/login', (req, res) => {
 
 // Projects
 app.post('/api/projects', authenticate, (req, res) => {
-  const { template } = req.body;
+  const { template, cardsPerPage } = req.body;
   
-  db.run('INSERT INTO projects (user_id, template) VALUES (?, ?)', [req.user.id, template], function(err) {
+  db.run('INSERT INTO projects (user_id, template, cards_per_page) VALUES (?, ?, ?)', 
+    [req.user.id, template, cardsPerPage || 4], function(err) {
     if (err) return res.status(500).json({ error: err.message });
-    res.json({ id: this.lastID, template, status: 'draft' });
+    res.json({ id: this.lastID, template, cardsPerPage: cardsPerPage || 4, status: 'draft' });
   });
 });
 
@@ -240,7 +241,7 @@ app.post('/api/confirm-payment', authenticate, async (req, res) => {
   }
 });
 
-// Generate PDF
+// Generate PDF with configurable cards per page
 async function generatePDF(projectId) {
   return new Promise((resolve, reject) => {
     db.get('SELECT * FROM projects WHERE id = ?', [projectId], async (err, project) => {
@@ -250,6 +251,7 @@ async function generatePDF(projectId) {
         if (err) return reject(err);
         
         const template = templates[project.template] || templates.classic;
+        const cardsPerPage = project.cards_per_page || 4;
         const pdfPath = path.join(__dirname, 'pdfs', `project-${projectId}.pdf`);
         
         if (!fs.existsSync(path.join(__dirname, 'pdfs'))) {
@@ -259,6 +261,43 @@ async function generatePDF(projectId) {
         const browser = await puppeteer.launch();
         const page = await browser.newPage();
         
+        // Calculate dimensions based on cards per page
+        let gridStyles, cardStyles;
+        
+        if (cardsPerPage === 1) {
+          // 1 card per page - full page size
+          gridStyles = 'grid-template-columns: 1fr; grid-template-rows: 1fr;';
+          cardStyles = 'width: 7in; height: 9in; padding: 0.75in;';
+        } else if (cardsPerPage === 2) {
+          // 2 cards per page - side by side or stacked
+          gridStyles = 'grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; gap: 0.5in; padding: 0.5in;';
+          cardStyles = 'width: 7.5in; height: 4.5in; padding: 0.4in;';
+        } else {
+          // 4 cards per page (default) - 2x2 grid
+          gridStyles = 'grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 0; padding: 0;';
+          cardStyles = 'width: 4.25in; height: 5.5in; padding: 0.4in;';
+        }
+        
+        // Adjust font sizes based on card size
+        let fontSizeStyles = '';
+        if (cardsPerPage === 1) {
+          fontSizeStyles = `
+            .header { font-size: 56px !important; margin-bottom: 30px !important; }
+            .recipient { font-size: 20px !important; margin-bottom: 25px !important; }
+            .message { font-size: 16px !important; line-height: 2 !important; }
+            .signature-text { font-size: 14px !important; }
+            .names { font-size: 36px !important; margin-top: 10px !important; }
+          `;
+        } else if (cardsPerPage === 2) {
+          fontSizeStyles = `
+            .header { font-size: 42px !important; margin-bottom: 20px !important; }
+            .recipient { font-size: 16px !important; margin-bottom: 15px !important; }
+            .message { font-size: 13px !important; line-height: 1.8 !important; }
+            .signature-text { font-size: 11px !important; }
+            .names { font-size: 28px !important; }
+          `;
+        }
+        
         let htmlContent = `
           <html>
           <head>
@@ -267,18 +306,19 @@ async function generatePDF(projectId) {
               @page { size: letter; margin: 0; }
               * { margin: 0; padding: 0; box-sizing: border-box; }
               body { font-family: 'Cormorant Garamond', serif; }
-              .sheet { width: 8.5in; height: 11in; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 0; padding: 0; page-break-after: always; }
-              .card { width: 4.25in; height: 5.5in; display: flex; flex-direction: column; justify-content: center; padding: 0.4in; position: relative; }
+              .sheet { width: 8.5in; height: 11in; display: grid; ${gridStyles} page-break-after: always; }
+              .card { display: flex; flex-direction: column; justify-content: center; position: relative; ${cardStyles} }
               ${template.styles}
+              ${fontSizeStyles}
             </style>
           </head>
           <body>
         `;
         
-        // Group cards into sheets of 4
-        for (let i = 0; i < cards.length; i += 4) {
+        // Group cards into sheets
+        for (let i = 0; i < cards.length; i += cardsPerPage) {
           htmlContent += '<div class="sheet">';
-          for (let j = i; j < i + 4 && j < cards.length; j++) {
+          for (let j = i; j < i + cardsPerPage && j < cards.length; j++) {
             const card = cards[j];
             htmlContent += `
               <div class="card">
@@ -293,7 +333,7 @@ async function generatePDF(projectId) {
             `;
           }
           // Fill empty slots
-          for (let j = cards.length; j < i + 4; j++) {
+          for (let j = cards.length; j < i + cardsPerPage; j++) {
             htmlContent += '<div class="card"></div>';
           }
           htmlContent += '</div>';
