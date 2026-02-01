@@ -293,8 +293,12 @@ async function handleFile(file) {
         // Route based on message type choice
         setTimeout(() => {
             if (currentState.messageType === 'prewritten') {
-                generatePrewrittenMessages();
-                showPreviewExamples();
+                // Check if all guests have messages
+                const hasAllMessages = generatePrewrittenMessages();
+                if (hasAllMessages) {
+                    showPreviewExamples();
+                }
+                // If hasAllMessages is false, error is shown and we stay on upload page
             } else {
                 showSection('aiGeneration');
             }
@@ -382,14 +386,33 @@ function selectMessageType(type) {
 }
 
 function generatePrewrittenMessages() {
-    currentState.guests = currentState.guests.map(guest => {
-        const giftType = guest.gift.toLowerCase().includes('cash') ? 'Cash gift' :
-                        guest.gift.toLowerCase().includes('card') ? 'Gift card' : 'default';
-        return {
-            ...guest,
-            message: prewrittenTemplates[giftType] || prewrittenTemplates.default
-        };
-    });
+    // Check if all guests have messages in the CSV
+    const missingMessages = currentState.guests.filter(g => !g.message || g.message.trim() === '');
+    
+    if (missingMessages.length > 0) {
+        // Show error and don't proceed
+        const uploadBox = document.getElementById('uploadBox');
+        uploadBox.innerHTML = `
+            <div class="upload-icon" style="color: #c44;">✗</div>
+            <h3 style="color: #c44;">Missing Messages</h3>
+            <p>You selected "Pre-Written Messages" but ${missingMessages.length} guest${missingMessages.length === 1 ? '' : 's'} in your CSV ${missingMessages.length === 1 ? 'is' : 'are'} missing message text.</p>
+            <div style="background: #fee; padding: 1rem; border-radius: 8px; margin: 1rem 0; text-align: left; font-size: 0.9rem;">
+                <strong>Options:</strong>
+                <ul style="margin: 0.5rem 0 0 1.5rem;">
+                    <li>Add message text to the "Message" column in your CSV</li>
+                    <li>Or go back and choose "AI-Assisted Messages" instead</li>
+                </ul>
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1rem;">
+                <button class="btn btn-back" onclick="goToStep(2)">← Back to Message Type</button>
+                <button class="btn" onclick="document.getElementById('fileInput').click()">Upload Different CSV</button>
+            </div>
+        `;
+        return false;
+    }
+    
+    // All guests have messages - proceed
+    return true;
 }
 
 // AI Generation
@@ -568,20 +591,36 @@ document.getElementById('paymentForm')?.addEventListener('submit', async (e) => 
     try {
         // Simple payment flow - no registration needed
         // 1. Create payment intent (guest checkout)
-        const paymentRes = await fetch(`${API_URL}/create-payment-intent`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                plan: currentState.currentPlan || 'premium',
-                email: email,
-                guests: currentState.guests || [],
-                template: currentState.template || 'classic'
-            })
-        });
+        console.log('Creating payment intent...', API_URL);
+        
+        let paymentRes;
+        try {
+            paymentRes = await fetch(`${API_URL}/create-payment-intent`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    plan: currentState.currentPlan || 'premium',
+                    email: email,
+                    guests: currentState.guests || [],
+                    template: currentState.template || 'classic'
+                })
+            });
+        } catch (networkError) {
+            console.error('Network error:', networkError);
+            throw new Error('Cannot connect to payment server. Please check your internet connection and try again.');
+        }
+        
+        console.log('Payment intent response:', paymentRes.status);
         
         if (!paymentRes.ok) {
-            const error = await paymentRes.json();
-            throw new Error(error.error || 'Payment setup failed');
+            let errorMessage = 'Payment setup failed';
+            try {
+                const error = await paymentRes.json();
+                errorMessage = error.error || error.message || 'Payment setup failed';
+            } catch (e) {
+                errorMessage = `Server error (${paymentRes.status}). Please try again.`;
+            }
+            throw new Error(errorMessage);
         }
         
         const { clientSecret } = await paymentRes.json();
