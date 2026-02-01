@@ -527,19 +527,35 @@ async function generateAIMessages() {
 function populateEditList() {
     const container = document.getElementById('editListContainer');
     
-    container.innerHTML = currentState.guests.map((guest, index) => `
+    // Escape HTML special characters to prevent breaking the template
+    function escapeHtml(text) {
+        if (!text) return '';
+        return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+    
+    container.innerHTML = currentState.guests.map((guest, index) => {
+        const safeName = escapeHtml(guest.name);
+        const safeGift = escapeHtml(guest.gift);
+        const safeMessage = escapeHtml(guest.message);
+        
+        return `
         <div class="edit-list-item">
             <div class="edit-list-header">
-                <span class="edit-list-recipient">${guest.name}</span>
-                <span class="edit-list-gift">${guest.gift}</span>
+                <span class="edit-list-recipient">${safeName}</span>
+                <span class="edit-list-gift">${safeGift}</span>
             </div>
             <textarea 
                 class="edit-list-textarea" 
                 id="edit-${index}"
                 onchange="updateMessage(${index}, this.value)"
-            >${guest.message}</textarea>
+            >${safeMessage}</textarea>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 function updateMessage(index, newMessage) {
