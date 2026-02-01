@@ -33,54 +33,38 @@ const emailTransporter = nodemailer.createTransport({
 async function generateMessageWithAI(guest, tone) {
   const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
   if (!OPENROUTER_API_KEY) {
-    console.warn('OPENROUTER_API_KEY not set, using fallback messages');
-    return generateFallbackMessage(guest, tone);
+    throw new Error('OPENROUTER_API_KEY not configured');
   }
 
   const prompt = `Write a ${tone} wedding thank you note to ${guest.name} who gave a ${guest.gift}. Keep it 2-3 sentences, warm and personal.`;
 
-  try {
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-        'HTTP-Referer': 'https://cardcraft.app',
-        'X-Title': 'CardCraft'
-      },
-      body: JSON.stringify({
-        model: 'moonshotai/kimi-k2.5',
-        messages: [
-          { role: 'system', content: 'You are a helpful assistant that writes personalized wedding thank you notes.' },
-          { role: 'user', content: prompt }
-        ],
-        max_tokens: 200,
-        temperature: 0.8
-      })
-    });
+  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+      'HTTP-Referer': 'https://cardcraft.app',
+      'X-Title': 'CardCraft'
+    },
+    body: JSON.stringify({
+      model: 'moonshotai/kimi-k2.5',
+      messages: [
+        { role: 'system', content: 'You are a helpful assistant that writes personalized wedding thank you notes.' },
+        { role: 'user', content: prompt }
+      ],
+      max_tokens: 200,
+      temperature: 0.8
+    })
+  });
 
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('OpenRouter API error:', errorData);
-      throw new Error(`OpenRouter API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.choices[0].message.content.trim();
-  } catch (error) {
-    console.error('Error calling OpenRouter API:', error);
-    return generateFallbackMessage(guest, tone);
+  if (!response.ok) {
+    const errorData = await response.text();
+    console.error('OpenRouter API error:', errorData);
+    throw new Error(`OpenRouter API error: ${response.status}`);
   }
-}
 
-function generateFallbackMessage(guest, tone) {
-  const fallbacks = {
-    warm: `Dear ${guest.name},\n\nWe are so grateful for your thoughtful ${guest.gift} and for sharing in our special day. Your generosity means the world to us as we begin this new chapter together. Thank you from the bottom of our hearts!\n\nWith love,\nCollin and Annika`,
-    formal: `Dear ${guest.name},\n\nWe wish to express our sincere gratitude for your generous gift of ${guest.gift} and for joining us on our wedding day. Your thoughtfulness is deeply appreciated.\n\nWarm regards,\nCollin and Annika`,
-    casual: `Hey ${guest.name.split(' ')[0]}!\n\nThanks so much for the awesome ${guest.gift} and for celebrating with us! We really appreciate it.\n\nThanks,\nCollin and Annika`,
-    poetic: `Dearest ${guest.name},\n\nYour gift of ${guest.gift} touched our hearts deeply. Like stars lighting our path, your kindness illuminates our new journey together.\n\nWith eternal gratitude,\nCollin and Annika`
-  };
-  return fallbacks[tone] || fallbacks.warm;
+  const data = await response.json();
+  return data.choices[0].message.content.trim();
 }
 
 // CORS configuration - allow all origins for now
@@ -235,7 +219,7 @@ app.post('/api/projects/:id/upload', authenticate, upload.single('file'), (req, 
         project_id: projectId,
         recipient_name: name,
         gift: gift,
-        message: row.Message || row.message || generateDefaultMessage(gift)
+        message: row.Message || row.message || ''
       });
     })
     .on('end', () => {
@@ -270,10 +254,6 @@ app.post('/api/projects/:id/upload', authenticate, upload.single('file'), (req, 
       });
     });
 });
-
-function generateDefaultMessage(gift) {
-  return `Thank you so much for your generous gift${gift ? ` of ${gift}` : ''}. Your kindness means the world to us as we begin this new chapter together.`;
-}
 
 // Get cards - preview only 4 if not paid
 app.get('/api/projects/:id/cards', authenticate, (req, res) => {
@@ -323,23 +303,31 @@ app.post('/api/projects/:id/generate-ai-messages', authenticate, async (req, res
   db.all('SELECT * FROM cards WHERE project_id = ?', [req.params.id], async (err, cards) => {
     if (err) return res.status(500).json({ error: err.message });
     
-    const updatedCards = [];
-    for (const card of cards) {
-      const guest = { name: card.recipient_name, gift: card.gift };
-      const message = await generateMessageWithAI(guest, tone);
-      
-      // Update in database
-      await new Promise((resolve, reject) => {
-        db.run('UPDATE cards SET message = ? WHERE id = ?', [message, card.id], (err) => {
-          if (err) reject(err);
-          else resolve();
+    try {
+      const updatedCards = [];
+      for (const card of cards) {
+        const guest = { name: card.recipient_name, gift: card.gift };
+        const message = await generateMessageWithAI(guest, tone);
+        
+        // Update in database
+        await new Promise((resolve, reject) => {
+          db.run('UPDATE cards SET message = ? WHERE id = ?', [message, card.id], (err) => {
+            if (err) reject(err);
+            else resolve();
+          });
         });
-      });
+        
+        updatedCards.push({ id: card.id, message });
+      }
       
-      updatedCards.push({ id: card.id, message });
+      res.json({ success: true, cards: updatedCards });
+    } catch (error) {
+      console.error('AI generation failed:', error);
+      res.status(503).json({ 
+        error: 'AI service unavailable',
+        message: 'Failed to generate AI messages. Please try again later or write your own messages.'
+      });
     }
-    
-    res.json({ success: true, cards: updatedCards });
   });
 });
 
