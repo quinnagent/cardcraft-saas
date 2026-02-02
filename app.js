@@ -1,4 +1,5 @@
 // CardCraft Frontend JavaScript
+// Updated: 2026-02-02 - Fixed AI generation endpoint
 
 // API Configuration
 const API_URL = 'https://pacific-vision-production.up.railway.app/api';
