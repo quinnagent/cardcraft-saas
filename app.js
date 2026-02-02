@@ -464,28 +464,72 @@ async function generateAIMessages() {
     generateBtn.disabled = true;
     
     try {
-        // Call backend API to generate AI messages (no auth required)
-        const response = await fetch(`${API_URL}/generate-ai-messages`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ 
-                tone: currentState.tone,
-                guests: currentState.guests.map((g, i) => ({
-                    id: i,
-                    name: g.name,
-                    gift: g.gift
-                }))
-            })
-        });
+        // Prepare request body
+        const requestBody = {
+            tone: currentState.tone,
+            guests: currentState.guests.map((g, i) => ({
+                id: i,
+                name: g.name,
+                gift: g.gift
+            }))
+        };
         
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to generate AI messages');
+        console.log('Sending request to:', `${API_URL}/generate-ai-messages`);
+        console.log('Request body:', JSON.stringify(requestBody));
+        
+        // Call backend API to generate AI messages (no auth required)
+        let response;
+        try {
+            response = await fetch(`${API_URL}/generate-ai-messages`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+        } catch (networkError) {
+            console.error('Network error during fetch:', networkError);
+            throw new Error('Network error: ' + networkError.message);
         }
         
-        const data = await response.json();
+        console.log('Response received, status:', response.status);
+        
+        if (!response.ok) {
+            let errorMessage = 'Failed to generate AI messages';
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.message || errorData.error || errorMessage;
+            } catch (e) {
+                errorMessage = 'Server error: ' + response.status;
+            }
+            throw new Error(errorMessage);
+        }
+        
+        // Get response as text first for debugging
+        let responseText;
+        try {
+            responseText = await response.text();
+            console.log('Response text:', responseText.substring(0, 200));
+        } catch (textError) {
+            console.error('Error reading response text:', textError);
+            throw new Error('Failed to read server response');
+        }
+        
+        // Parse JSON
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (parseError) {
+            console.error('JSON parse error:', parseError);
+            console.error('Response text was:', responseText);
+            throw new Error('Invalid response from server');
+        }
+        
+        console.log('Parsed response data:', data);
+        
+        if (!data.success || !data.cards || !Array.isArray(data.cards)) {
+            throw new Error('Invalid response format from server');
+        }
         
         // Update guests with AI-generated messages
         currentState.generatedMessages = data.cards;
@@ -494,6 +538,8 @@ async function generateAIMessages() {
             gift: card.gift,
             message: card.message
         }));
+        
+        console.log('Updated guests:', currentState.guests);
         
         // Populate edit list
         try {
