@@ -83,7 +83,14 @@ function showSection(sectionId) {
     const section = document.getElementById(sectionId);
     if (section) {
         section.classList.add('active');
-        section.scrollIntoView({ behavior: 'smooth' });
+        // Use window.scrollTo instead of scrollIntoView for better Safari compatibility
+        const rect = section.getBoundingClientRect();
+        if (rect.top < 0 || rect.bottom > window.innerHeight) {
+            window.scrollTo({
+                top: window.pageYOffset + rect.top - 20,
+                behavior: 'smooth'
+            });
+        }
     }
     
     // Show progress bar after template selection
@@ -584,24 +591,38 @@ function populateEditList() {
             .replace(/'/g, '&#039;');
     }
     
-    container.innerHTML = currentState.guests.map((guest, index) => {
-        const safeName = escapeHtml(guest.name);
-        const safeGift = escapeHtml(guest.gift);
-        const safeMessage = escapeHtml(guest.message);
+    // Build HTML using createElement to avoid innerHTML issues in Safari
+    container.innerHTML = '';
+    
+    currentState.guests.forEach((guest, index) => {
+        const item = document.createElement('div');
+        item.className = 'edit-list-item';
         
-        return `
-        <div class="edit-list-item">
-            <div class="edit-list-header">
-                <span class="edit-list-recipient">${safeName}</span>
-                <span class="edit-list-gift">${safeGift}</span>
-            </div>
-            <textarea 
-                class="edit-list-textarea" 
-                id="edit-${index}"
-                onchange="updateMessage(${index}, this.value)"
-            >${safeMessage}</textarea>
-        </div>
-    `}).join('');
+        const header = document.createElement('div');
+        header.className = 'edit-list-header';
+        
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'edit-list-recipient';
+        nameSpan.textContent = guest.name;
+        
+        const giftSpan = document.createElement('span');
+        giftSpan.className = 'edit-list-gift';
+        giftSpan.textContent = guest.gift;
+        
+        header.appendChild(nameSpan);
+        header.appendChild(giftSpan);
+        
+        const textarea = document.createElement('textarea');
+        textarea.className = 'edit-list-textarea';
+        textarea.id = 'edit-' + index;
+        textarea.textContent = guest.message;
+        textarea.onchange = function() { updateMessage(index, this.value); };
+        
+        item.appendChild(header);
+        item.appendChild(textarea);
+        
+        container.appendChild(item);
+    });
 }
 
 function updateMessage(index, newMessage) {
