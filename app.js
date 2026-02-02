@@ -714,22 +714,36 @@ let cardElement;
 // Initialize card element when payment modal opens
 function initStripe() {
     if (!cardElement) {
-        const elements = stripe.elements();
-        cardElement = elements.create('card', {
-            style: {
-                base: {
-                    fontSize: '16px',
-                    color: '#3d3d3d',
-                    '::placeholder': { color: '#aab7c4' }
+        try {
+            const elements = stripe.elements();
+            cardElement = elements.create('card', {
+                style: {
+                    base: {
+                        fontSize: '16px',
+                        color: '#3d3d3d',
+                        '::placeholder': { color: '#aab7c4' }
+                    }
                 }
+            });
+            
+            // Mount to the card element container
+            const cardContainer = document.getElementById('cardElement');
+            if (cardContainer) {
+                cardElement.mount('#cardElement');
+                console.log('Stripe card element mounted successfully');
+            } else {
+                console.error('Card element container not found');
             }
-        });
-        cardElement.mount('#cardElement');
-        
-        cardElement.on('change', (event) => {
-            const errorDiv = document.getElementById('cardErrors');
-            errorDiv.textContent = event.error ? event.error.message : '';
-        });
+            
+            cardElement.on('change', (event) => {
+                const errorDiv = document.getElementById('cardErrors');
+                if (errorDiv) {
+                    errorDiv.textContent = event.error ? event.error.message : '';
+                }
+            });
+        } catch (error) {
+            console.error('Error initializing Stripe:', error);
+        }
     }
 }
 
