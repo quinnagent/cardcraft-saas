@@ -670,8 +670,33 @@ function showPreviewExamples() {
 function openPayment(plan) {
     currentState.currentPlan = plan;
     const prices = { starter: 19, premium: 39, unlimited: 79 };
-    document.getElementById('payAmount').textContent = prices[plan];
+    const price = prices[plan];
+    
+    // Update payment button amount
+    document.getElementById('payAmount').textContent = price;
+    
+    // Update order summary
+    const templateNames = {
+        classic: 'Classic Elegance',
+        modern: 'Modern Minimal',
+        romantic: 'Romantic Blush'
+    };
+    
+    const planNames = {
+        starter: 'Starter (up to 25 cards)',
+        premium: 'Premium (up to 75 cards)',
+        unlimited: 'Unlimited'
+    };
+    
+    document.getElementById('orderTemplate').textContent = templateNames[currentState.template] || 'Classic Elegance';
+    document.getElementById('orderCardCount').textContent = currentState.guests.length + ' cards';
+    document.getElementById('orderPlan').textContent = planNames[plan] || 'Premium';
+    document.getElementById('orderTotal').textContent = price;
+    
     document.getElementById('paymentModal').classList.add('active');
+    
+    // Initialize Stripe elements
+    initStripe();
 }
 
 function closePayment() {

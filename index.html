@@ -1971,6 +1971,28 @@
                 <h3>Complete Your Purchase</h3>
                 <button class="close-btn" onclick="closePayment()">×</button>
             </div>
+            
+            <!-- Order Summary -->
+            <div class="order-summary" style="background: #f8f6f3; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                <h4 style="margin: 0 0 1rem 0; color: #5c4a3d;">Order Summary</h4>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span>Template:</span>
+                    <span id="orderTemplate" style="font-weight: 500;">Classic Elegance</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span>Cards:</span>
+                    <span id="orderCardCount" style="font-weight: 500;">8 cards</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span>Plan:</span>
+                    <span id="orderPlan" style="font-weight: 500;">Premium</span>
+                </div>
+                <div style="border-top: 1px solid #ddd; margin-top: 1rem; padding-top: 1rem; display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: 600;">
+                    <span>Total:</span>
+                    <span>$<span id="orderTotal">39</span></span>
+                </div>
+            </div>
+            
             <form id="paymentForm">
                 <div class="form-group">
                     <label>Email Address</label>
