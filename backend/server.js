@@ -12,6 +12,9 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const db = require('./database');
 
+// Import fetch for Node.js (fallback to node-fetch if native fetch not available)
+const fetch = global.fetch || require('node-fetch');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
@@ -44,77 +47,138 @@ function generateFallbackMessage(guest, tone) {
   return templates[tone] || templates.warm;
 }
 
-// LLM Integration with OpenRouter
+// LLM Integration with OpenRouter - Enhanced with retry logic and fallbacks
+
+// List of models to try in order (fallback chain)
+const MODEL_CHAIN = [
+  'anthropic/claude-3.5-sonnet',
+  'openai/gpt-4o-mini',
+  'google/gemini-2.0-flash-exp:free',
+  'meta-llama/llama-3.1-8b-instruct:free'
+];
+
+// Exponential backoff delay calculation
+function getRetryDelay(attempt, baseDelay = 1000) {
+  const delay = baseDelay * Math.pow(2, attempt);
+  const jitter = delay * 0.1 * (Math.random() - 0.5); // ±5% jitter
+  return Math.round(delay + jitter);
+}
+
+// Retry wrapper for async functions
+async function withRetry(fn, options = {}) {
+  const { maxRetries = 2, baseDelay = 1000, shouldRetry } = options;
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      const statusCode = error.statusCode || error.status || 0;
+      const isRetryable = [408, 429, 502, 503].includes(statusCode);
+      
+      // Check custom retry condition if provided
+      const customRetry = shouldRetry ? shouldRetry(error) : true;
+      
+      if ((!isRetryable && !customRetry) || attempt === maxRetries) {
+        throw error;
+      }
+      
+      const delay = getRetryDelay(attempt, baseDelay);
+      console.log(`Retry ${attempt + 1}/${maxRetries} after ${delay}ms`);
+      await new Promise(r => setTimeout(r, delay));
+    }
+  }
+  throw new Error('Max retries exceeded');
+}
+
+// Try generating with a specific model
+async function tryGenerateWithModel(apiKey, model, guest, tone) {
+  const prompt = `Write a ${tone} wedding thank you note to ${guest.name} who gave a ${guest.gift}. Keep it 2-3 sentences, warm and personal.`;
+  
+  console.log(`Trying model ${model} for:`, guest.name);
+
+  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+      'HTTP-Referer': 'https://cardcraft.app',
+      'X-Title': 'CardCraft'
+    },
+    body: JSON.stringify({
+      model: model,
+      messages: [
+        { role: 'system', content: 'You are a helpful assistant that writes personalized wedding thank you notes.' },
+        { role: 'user', content: prompt }
+      ],
+      max_tokens: 200,
+      temperature: 0.8
+    })
+  });
+
+  console.log(`Model ${model} response status:`, response.status);
+
+  if (!response.ok) {
+    const error = new Error(`API error: ${response.status}`);
+    error.statusCode = response.status;
+    throw error;
+  }
+
+  const responseText = await response.text();
+  
+  let data;
+  try {
+    data = JSON.parse(responseText);
+  } catch (parseError) {
+    console.error(`Failed to parse response from ${model}:`, responseText.substring(0, 200));
+    throw new Error('Invalid JSON response');
+  }
+  
+  if (!data.choices || !data.choices[0]) {
+    console.error(`No choices in response from ${model}:`, JSON.stringify(data).substring(0, 200));
+    throw new Error('Invalid response structure');
+  }
+  
+  const choice = data.choices[0];
+  const content = choice.message?.content || choice.text || choice.content;
+  
+  if (!content) {
+    console.error(`No content in response from ${model}`);
+    throw new Error('No content in response');
+  }
+  
+  console.log(`Model ${model} succeeded for:`, guest.name);
+  return content.trim();
+}
+
+// Main AI generation function with model fallback chain
 async function generateMessageWithAI(guest, tone) {
   const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
   if (!OPENROUTER_API_KEY) {
-    throw new Error('OPENROUTER_API_KEY not configured');
-  }
-
-  const prompt = `Write a ${tone} wedding thank you note to ${guest.name} who gave a ${guest.gift}. Keep it 2-3 sentences, warm and personal.`;
-
-  console.log('Calling OpenRouter API for:', guest.name);
-
-  try {
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-        'HTTP-Referer': 'https://cardcraft.app',
-        'X-Title': 'CardCraft'
-      },
-      body: JSON.stringify({
-        model: 'anthropic/claude-3.5-sonnet',
-        messages: [
-          { role: 'system', content: 'You are a helpful assistant that writes personalized wedding thank you notes.' },
-          { role: 'user', content: prompt }
-        ],
-        max_tokens: 200,
-        temperature: 0.8
-      })
-    });
-
-    console.log('OpenRouter response status:', response.status);
-
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('OpenRouter API error response:', errorData);
-      throw new Error(`OpenRouter API error: ${response.status} - ${errorData}`);
-    }
-
-    const responseText = await response.text();
-    console.log('OpenRouter raw response:', responseText.substring(0, 200));
-    
-    let data;
-    try {
-      data = JSON.parse(responseText);
-    } catch (parseError) {
-      console.error('Failed to parse OpenRouter response as JSON:', responseText.substring(0, 500));
-      throw new Error('Invalid JSON response from OpenRouter');
-    }
-    
-    if (!data.choices || !data.choices[0]) {
-      console.error('Unexpected OpenRouter response structure:', JSON.stringify(data));
-      throw new Error('Invalid response structure from OpenRouter');
-    }
-    
-    // Handle different response formats
-    const choice = data.choices[0];
-    const content = choice.message?.content || choice.text || choice.content;
-    
-    if (!content) {
-      console.error('No content in OpenRouter response:', JSON.stringify(choice));
-      // Return a fallback message instead of throwing
-      return generateFallbackMessage(guest, tone);
-    }
-    
-    return content.trim();
-  } catch (error) {
-    console.error('OpenRouter fetch error:', error.message);
-    // Return fallback message on any error
+    console.log('OPENROUTER_API_KEY not configured, using fallback');
     return generateFallbackMessage(guest, tone);
   }
+
+  // Try each model in the chain
+  for (const model of MODEL_CHAIN) {
+    try {
+      // Use retry logic for each model attempt
+      const message = await withRetry(
+        () => tryGenerateWithModel(OPENROUTER_API_KEY, model, guest, tone),
+        { maxRetries: 1, baseDelay: 1000 }
+      );
+      
+      if (message && message.length > 10) {
+        return message;
+      }
+    } catch (error) {
+      console.log(`Model ${model} failed:`, error.message);
+      // Continue to next model
+    }
+  }
+
+  // All models failed, use fallback
+  console.log('All AI models failed, using fallback message for:', guest.name);
+  return generateFallbackMessage(guest, tone);
 }
 
 // CORS configuration - explicitly allow GitHub Pages
