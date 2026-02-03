@@ -604,34 +604,48 @@ app.post('/api/create-checkout-session', async (req, res) => {
 app.get('/api/checkout-success', async (req, res) => {
   const { session_id } = req.query;
   
+  console.log('Checkout success called with session:', session_id);
+  
+  if (!session_id) {
+    return res.status(400).json({ error: 'Session ID required' });
+  }
+  
   try {
     const session = await stripe.checkout.sessions.retrieve(session_id);
+    console.log('Session status:', session.payment_status);
     
     if (session.payment_status === 'paid') {
       const { projectId, email } = session.metadata;
+      console.log('Project ID:', projectId, 'Email:', email);
+      
       const tempProject = global.tempProjects?.[projectId];
       
       if (!tempProject) {
+        console.error('Project not found in temp storage');
         return res.status(404).json({ error: 'Project not found' });
       }
       
+      console.log('Generating PDF for project...');
       // Generate PDF
       const pdfPath = await generatePDFSimple(tempProject, projectId);
       const pdfUrl = `/pdfs/${path.basename(pdfPath)}`;
+      console.log('PDF generated:', pdfUrl);
       
-      // Send email with download link
-      await sendDownloadEmail(email, projectId, pdfUrl);
+      // Send email with download link (if configured)
+      console.log('Sending email...');
+      const emailSent = await sendDownloadEmail(email, projectId, pdfUrl);
+      console.log('Email sent:', emailSent);
       
       // Clean up temp data
       delete global.tempProjects[projectId];
       
-      res.json({ success: true, pdfUrl });
+      res.json({ success: true, pdfUrl, emailSent });
     } else {
       res.status(400).json({ error: 'Payment not completed' });
     }
   } catch (err) {
     console.error('Checkout success error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message, details: err.stack });
   }
 });
 
@@ -702,6 +716,12 @@ app.post('/api/confirm-payment-simple', async (req, res) => {
 
 // Send download email
 async function sendDownloadEmail(email, projectId, pdfUrl) {
+  // Check if email is configured
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.log('Email not configured - skipping email send');
+    return false;
+  }
+  
   const fullUrl = `${process.env.FRONTEND_URL || 'https://quinnagent.github.io/cardcraft-saas'}${pdfUrl}`;
   
   const mailOptions = {
@@ -736,8 +756,10 @@ async function sendDownloadEmail(email, projectId, pdfUrl) {
   try {
     await emailTransporter.sendMail(mailOptions);
     console.log(`Download email sent to ${email}`);
+    return true;
   } catch (error) {
     console.error('Error sending email:', error);
+    return false;
   }
 }
 

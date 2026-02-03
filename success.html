@@ -72,6 +72,18 @@
             font-size: 0.9rem;
         }
         
+        .download-section {
+            display: none;
+            background: #e8f5e9;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .download-section.active {
+            display: block;
+        }
+        
         .btn {
             display: inline-block;
             padding: 0.875rem 2rem;
@@ -81,6 +93,9 @@
             border-radius: 8px;
             font-weight: 500;
             transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
         }
         
         .btn:hover {
@@ -88,9 +103,19 @@
             transform: translateY(-1px);
         }
         
+        .btn-download {
+            background: #4CAF50;
+            font-size: 1.1rem;
+            padding: 1rem 2rem;
+        }
+        
+        .btn-download:hover {
+            background: #45a049;
+        }
+        
         .loading {
             display: none;
-            margin-top: 1rem;
+            margin: 1.5rem 0;
         }
         
         .loading.active {
@@ -98,9 +123,9 @@
         }
         
         .spinner {
-            width: 24px;
-            height: 24px;
-            border: 2px solid #e8e4df;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e8e4df;
             border-top-color: #5c4a3d;
             border-radius: 50%;
             animation: spin 1s linear infinite;
@@ -109,6 +134,20 @@
         
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            display: none;
+            background: #ffebee;
+            color: #c62828;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .error-message.active {
+            display: block;
         }
     </style>
 </head>
@@ -123,39 +162,63 @@
         <h1>Payment Successful!</h1>
         <p>Thank you for your purchase. Your wedding thank you cards are being prepared.</p>
         
-        <div class="email-note">
-            📧 A download link has been sent to your email address.
-        </div>
-        
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            <p style="margin-top: 0.5rem; font-size: 0.875rem;">Preparing your cards...</p>
+            <p style="margin-top: 1rem; color: #666;">Generating your PDF...</p>
+        </div>
+        
+        <div class="download-section" id="downloadSection">
+            <p style="margin-bottom: 1rem; color: #2e7d32; font-weight: 500;">✨ Your cards are ready!</p>
+            <a id="downloadBtn" href="#" class="btn btn-download" download>Download PDF</a>
+        </div>
+        
+        <div class="error-message" id="errorMessage">
+            There was an issue preparing your cards. Please contact support.
+        </div>
+        
+        <div class="email-note" id="emailNote" style="display: none;">
+            📧 A download link has also been sent to your email address.
         </div>
         
         <a href="/cardcraft-saas/" class="btn">← Back to Home</a>
     </div>
     
     <script>
-        // Get session ID from URL
+        const API_URL = 'https://pacific-vision-production.up.railway.app/api';
         const urlParams = new URLSearchParams(window.location.search);
         const sessionId = urlParams.get('session_id');
         
         if (sessionId) {
             document.getElementById('loading').classList.add('active');
             
-            // Optional: Call backend to confirm payment and trigger PDF generation
-            const API_URL = 'https://pacific-vision-production.up.railway.app/api';
-            
             fetch(`${API_URL}/checkout-success?session_id=${sessionId}`)
             .then(response => response.json())
             .then(data => {
-                console.log('Payment confirmed:', data);
                 document.getElementById('loading').classList.remove('active');
+                
+                if (data.success && data.pdfUrl) {
+                    // Show download button
+                    const downloadSection = document.getElementById('downloadSection');
+                    const downloadBtn = document.getElementById('downloadBtn');
+                    downloadSection.classList.add('active');
+                    downloadBtn.href = `${API_URL}${data.pdfUrl}`;
+                    
+                    // Show email note
+                    document.getElementById('emailNote').style.display = 'block';
+                } else if (data.error) {
+                    document.getElementById('errorMessage').textContent = data.error;
+                    document.getElementById('errorMessage').classList.add('active');
+                }
             })
             .catch(err => {
                 console.error('Error:', err);
                 document.getElementById('loading').classList.remove('active');
+                document.getElementById('errorMessage').textContent = 'Error: ' + err.message;
+                document.getElementById('errorMessage').classList.add('active');
             });
+        } else {
+            document.getElementById('errorMessage').textContent = 'No session ID found. Please contact support.';
+            document.getElementById('errorMessage').classList.add('active');
         }
     </script>
 </body>
