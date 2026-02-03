@@ -165,6 +165,7 @@
         <div class="loading" id="loading">
             <div class="spinner"></div>
             <p style="margin-top: 1rem; color: #666;">Generating your PDF...</p>
+            <p style="margin-top: 0.5rem; color: #999; font-size: 0.875rem;">This may take 2-5 minutes. Please don't close this page.</p>
         </div>
         
         <div class="download-section" id="downloadSection">
@@ -192,11 +193,12 @@
         const urlParams = new URLSearchParams(window.location.search);
         const sessionId = urlParams.get('session_id');
         
-        async function fetchWithRetry(url, options = {}, maxRetries = 3) {
+        async function fetchWithRetry(url, options = {}, maxRetries = 5) {
             for (let i = 0; i < maxRetries; i++) {
                 try {
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+                    // 10 minute timeout for slow Railway free tier
+                    const timeoutId = setTimeout(() => controller.abort(), 600000);
                     
                     const response = await fetch(url, {
                         ...options,
@@ -207,7 +209,8 @@
                 } catch (err) {
                     console.log(`Attempt ${i + 1} failed:`, err.message);
                     if (i === maxRetries - 1) throw err;
-                    await new Promise(r => setTimeout(r, 2000 * (i + 1))); // Exponential backoff
+                    // Wait longer between retries (5s, 10s, 15s...)
+                    await new Promise(r => setTimeout(r, 5000 * (i + 1)));
                 }
             }
         }
