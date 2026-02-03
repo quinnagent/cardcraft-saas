@@ -192,11 +192,38 @@
         const urlParams = new URLSearchParams(window.location.search);
         const sessionId = urlParams.get('session_id');
         
+        async function fetchWithRetry(url, options = {}, maxRetries = 3) {
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+                    
+                    const response = await fetch(url, {
+                        ...options,
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+                    return response;
+                } catch (err) {
+                    console.log(`Attempt ${i + 1} failed:`, err.message);
+                    if (i === maxRetries - 1) throw err;
+                    await new Promise(r => setTimeout(r, 2000 * (i + 1))); // Exponential backoff
+                }
+            }
+        }
+        
         if (sessionId) {
             document.getElementById('loading').classList.add('active');
             
-            fetch(`${API_URL}/checkout-success?session_id=${sessionId}`)
-            .then(response => response.json())
+            fetchWithRetry(`${API_URL}/checkout-success?session_id=${sessionId}`)
+            .then(async response => {
+                const text = await response.text();
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    throw new Error('Invalid response: ' + text.substring(0, 100));
+                }
+            })
             .then(data => {
                 document.getElementById('loading').classList.remove('active');
                 
@@ -221,7 +248,9 @@
             .catch(err => {
                 console.error('Error:', err);
                 document.getElementById('loading').classList.remove('active');
-                document.getElementById('errorMessage').textContent = 'Error: ' + err.message;
+                document.getElementById('errorMessage').innerHTML = 
+                    'Error loading your cards: ' + err.message + '<br><br>' +
+                    'Please try refreshing the page, or contact support with your order details.';
                 document.getElementById('errorMessage').classList.add('active');
             });
         } else {
