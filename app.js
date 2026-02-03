@@ -672,9 +672,6 @@ function openPayment(plan) {
     const prices = { starter: 19, premium: 39, unlimited: 79 };
     const price = prices[plan];
     
-    // Update payment button amount
-    document.getElementById('payAmount').textContent = price;
-    
     // Update order summary
     const templateNames = {
         classic: 'Classic Elegance',
