@@ -882,17 +882,25 @@ async function generatePDFSimple(project, projectId) {
   const page = await browser.newPage();
   
   // Calculate dimensions based on cards per page
-  let gridStyles, cardStyles;
+  // Added padding and gaps to prevent borders from being cut off during printing
+  let gridStyles, cardStyles, pagePadding;
   
   if (cardsPerPage === 1) {
-    gridStyles = 'grid-template-columns: 1fr; grid-template-rows: 1fr;';
-    cardStyles = 'width: 7in; height: 9in; padding: 0.75in;';
+    // 1 card per page - centered with margin
+    pagePadding = '0.5in';
+    gridStyles = `grid-template-columns: 1fr; grid-template-rows: 1fr; gap: 0; padding: ${pagePadding};`;
+    cardStyles = 'width: 7in; height: 9in; padding: 0.75in; margin: auto;';
   } else if (cardsPerPage === 2) {
-    gridStyles = 'grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; gap: 0.5in; padding: 0.5in;';
-    cardStyles = 'width: 7.5in; height: 4.5in; padding: 0.4in;';
+    // 2 cards per page - horizontal layout
+    pagePadding = '0.4in';
+    gridStyles = `grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; gap: 0.25in; padding: ${pagePadding};`;
+    cardStyles = 'width: 7.5in; height: 4.5in; padding: 0.4in; margin: auto;';
   } else {
-    gridStyles = 'grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 0; padding: 0;';
-    cardStyles = 'width: 4.25in; height: 5.5in; padding: 0.4in;';
+    // 4 cards per page - most common, add gap for cutting
+    pagePadding = '0.25in';
+    gridStyles = `grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 0.2in; padding: ${pagePadding};`;
+    // Slightly smaller cards (4.1in x 5.3in instead of 4.25in x 5.5in) to fit with gaps
+    cardStyles = 'width: 4.1in; height: 5.3in; padding: 0.4in; margin: auto;';
   }
   
   let htmlContent = `
@@ -900,11 +908,26 @@ async function generatePDFSimple(project, projectId) {
     <head>
       <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
       <style>
-        @page { size: letter; margin: 0; }
+        @page { size: letter; margin: 0.25in; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Cormorant Garamond', serif; }
-        .sheet { width: 8.5in; height: 11in; display: grid; ${gridStyles} page-break-after: always; }
-        .card { display: flex; flex-direction: column; justify-content: center; position: relative; ${cardStyles} }
+        .sheet { 
+          width: 8in; 
+          height: 10.5in; 
+          display: grid; 
+          ${gridStyles} 
+          page-break-after: always; 
+          align-content: center;
+          justify-content: center;
+        }
+        .card { 
+          display: flex; 
+          flex-direction: column; 
+          justify-content: center; 
+          position: relative; 
+          ${cardStyles} 
+          box-sizing: border-box;
+        }
         ${template.styles}
       </style>
     </head>
