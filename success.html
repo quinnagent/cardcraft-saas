@@ -180,6 +180,10 @@
             📧 A download link has also been sent to your email address.
         </div>
         
+        <div class="email-note" id="emailNotSent" style="display: none; background: #fff3e0;">
+            ⚠️ Email delivery is temporarily unavailable. Please download your PDF above.
+        </div>
+        
         <a href="/cardcraft-saas/" class="btn">← Back to Home</a>
     </div>
     
@@ -203,8 +207,12 @@
                     downloadSection.classList.add('active');
                     downloadBtn.href = `${API_URL}${data.pdfUrl}`;
                     
-                    // Show email note
-                    document.getElementById('emailNote').style.display = 'block';
+                    // Show email status
+                    if (data.emailSent) {
+                        document.getElementById('emailNote').style.display = 'block';
+                    } else {
+                        document.getElementById('emailNotSent').style.display = 'block';
+                    }
                 } else if (data.error) {
                     document.getElementById('errorMessage').textContent = data.error;
                     document.getElementById('errorMessage').classList.add('active');

@@ -717,6 +717,12 @@ app.post('/api/confirm-payment-simple', async (req, res) => {
 // Send download email
 async function sendDownloadEmail(email, projectId, pdfUrl) {
   // Check if email is configured
+  console.log('Checking email config:', {
+    user: process.env.EMAIL_USER ? 'Set' : 'Not set',
+    pass: process.env.EMAIL_PASS ? 'Set' : 'Not set',
+    service: process.env.EMAIL_SERVICE
+  });
+  
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
     console.log('Email not configured - skipping email send');
     return false;
