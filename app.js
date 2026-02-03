@@ -794,15 +794,7 @@ document.getElementById('paymentForm')?.addEventListener('submit', async (e) => 
     }
 });
 
-// Initialize stripe when payment modal opens
-const originalOpenPayment = openPayment;
-openPayment = function(plan) {
-    currentState.currentPlan = plan;
-    const prices = { starter: 19, premium: 39, unlimited: 79 };
-    document.getElementById('payAmount').textContent = prices[plan];
-    document.getElementById('paymentModal').classList.add('active');
-    initStripe();
-};
+// Close modal on outside click
 
 // Close modal on outside click
 document.getElementById('paymentModal')?.addEventListener('click', (e) => {
