@@ -694,9 +694,6 @@ function openPayment(plan) {
     document.getElementById('orderTotal').textContent = price;
     
     document.getElementById('paymentModal').classList.add('active');
-    
-    // Initialize Stripe elements
-    initStripe();
 }
 
 function closePayment() {
@@ -747,80 +744,45 @@ function initStripe() {
     }
 }
 
-// Payment form submission
+// Payment form submission - Stripe Checkout
 document.getElementById('paymentForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const btn = document.getElementById('payButton');
     const originalText = btn.textContent;
-    btn.textContent = 'Processing...';
+    btn.textContent = 'Redirecting to Stripe...';
     btn.disabled = true;
     
     const email = document.getElementById('emailInput').value;
     
     try {
-        // Simple payment flow - no registration needed
-        // 1. Create payment intent (guest checkout)
-        console.log('Creating payment intent...', API_URL);
+        // Create Stripe Checkout Session
+        console.log('Creating checkout session...', API_URL);
         
-        let paymentRes;
-        try {
-            paymentRes = await fetch(`${API_URL}/create-payment-intent`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    plan: currentState.currentPlan || 'premium',
-                    email: email,
-                    guests: currentState.guests || [],
-                    template: currentState.template || 'classic'
-                })
-            });
-        } catch (networkError) {
-            console.error('Network error:', networkError);
-            throw new Error('Cannot connect to payment server. Please check your internet connection and try again.');
-        }
-        
-        console.log('Payment intent response:', paymentRes.status);
-        
-        if (!paymentRes.ok) {
-            let errorMessage = 'Payment setup failed';
-            try {
-                const error = await paymentRes.json();
-                errorMessage = error.error || error.message || 'Payment setup failed';
-            } catch (e) {
-                errorMessage = `Server error (${paymentRes.status}). Please try again.`;
-            }
-            throw new Error(errorMessage);
-        }
-        
-        const { clientSecret } = await paymentRes.json();
-        
-        // 2. Confirm payment with Stripe
-        const { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
-            payment_method: {
-                card: cardElement,
-                billing_details: { email }
-            }
-        });
-        
-        if (error) throw new Error(error.message);
-        
-        // 3. Confirm on backend (this triggers email with download link)
-        await fetch(`${API_URL}/confirm-payment-simple`, {
+        const checkoutRes = await fetch(`${API_URL}/create-checkout-session`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                paymentIntentId: paymentIntent.id,
-                email: email
+                plan: currentState.currentPlan || 'premium',
+                email: email,
+                guests: currentState.guests || [],
+                template: currentState.template || 'classic'
             })
         });
         
-        alert('Payment successful! Check your email for the download link.');
-        closePayment();
+        if (!checkoutRes.ok) {
+            const error = await checkoutRes.json();
+            throw new Error(error.error || 'Failed to create checkout session');
+        }
+        
+        const { url } = await checkoutRes.json();
+        
+        // Redirect to Stripe Checkout
+        window.location.href = url;
         
     } catch (err) {
-        document.getElementById('cardErrors').textContent = err.message;
-    } finally {
+        console.error('Checkout error:', err);
+        alert('Error: ' + err.message);
         btn.textContent = originalText;
         btn.disabled = false;
     }

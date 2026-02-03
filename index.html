@@ -2005,14 +2005,17 @@
                     <input type="email" id="emailInput" placeholder="you@example.com" required>
                     <small style="color: #666; font-size: 0.8rem;">We'll send your download link here</small>
                 </div>
-                <div class="form-group">
-                    <label>Card Information</label>
-                    <div id="cardElement" class="card-element">
-                        <!-- Stripe Card Element will be inserted here -->
-                    </div>
-                    <div id="cardErrors" style="color: #c44; font-size: 0.875rem; margin-top: 0.5rem;"></div>
-                </div>
-                <button type="submit" class="pay-btn" id="payButton">Pay $<span id="payAmount">39</span></button>
+                <button type="submit" class="pay-btn" id="payButton">
+                    <span style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        Continue to Secure Payment
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle;">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </span>
+                </button>
+                <p style="text-align: center; color: #666; font-size: 0.875rem; margin-top: 1rem;">
+                    🔒 Secured by Stripe. You'll be redirected to complete payment.
+                </p>
             </form>
         </div>
     </div>

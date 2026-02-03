@@ -537,6 +537,104 @@ app.post('/api/create-payment-intent', async (req, res) => {
   }
 });
 
+// Stripe Checkout - creates a Checkout Session for hosted payment page
+app.post('/api/create-checkout-session', async (req, res) => {
+  const { plan, email, guests, template } = req.body;
+  
+  const planDetails = {
+    starter: { amount: 1900, name: 'Starter Package', description: 'Up to 25 cards' },
+    premium: { amount: 3900, name: 'Premium Package', description: 'Up to 75 cards' },
+    unlimited: { amount: 7900, name: 'Unlimited Package', description: 'Unlimited cards' }
+  };
+  
+  const selectedPlan = planDetails[plan];
+  if (!selectedPlan) {
+    return res.status(400).json({ error: 'Invalid plan' });
+  }
+  
+  try {
+    // Create temporary project
+    const projectId = uuidv4();
+    
+    // Store project data
+    global.tempProjects = global.tempProjects || {};
+    global.tempProjects[projectId] = {
+      email,
+      guests,
+      template: template || 'classic',
+      cardsPerPage: 4,
+      createdAt: Date.now(),
+      plan
+    };
+    
+    // Create Stripe Checkout Session
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [{
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: `CardCraft - ${selectedPlan.name}`,
+            description: `${selectedPlan.description} | Template: ${template || 'classic'} | Cards: ${guests?.length || 0}`,
+          },
+          unit_amount: selectedPlan.amount,
+        },
+        quantity: 1,
+      }],
+      mode: 'payment',
+      success_url: `${process.env.FRONTEND_URL || 'https://quinnagent.github.io/cardcraft-saas'}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.FRONTEND_URL || 'https://quinnagent.github.io/cardcraft-saas'}/`,
+      customer_email: email,
+      metadata: {
+        projectId,
+        email,
+        guestCount: guests?.length || 0,
+        template: template || 'classic'
+      }
+    });
+    
+    res.json({ sessionId: session.id, url: session.url });
+  } catch (err) {
+    console.error('Checkout session error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Handle successful checkout
+app.get('/api/checkout-success', async (req, res) => {
+  const { session_id } = req.query;
+  
+  try {
+    const session = await stripe.checkout.sessions.retrieve(session_id);
+    
+    if (session.payment_status === 'paid') {
+      const { projectId, email } = session.metadata;
+      const tempProject = global.tempProjects?.[projectId];
+      
+      if (!tempProject) {
+        return res.status(404).json({ error: 'Project not found' });
+      }
+      
+      // Generate PDF
+      const pdfPath = await generatePDFSimple(tempProject, projectId);
+      const pdfUrl = `/pdfs/${path.basename(pdfPath)}`;
+      
+      // Send email with download link
+      await sendDownloadEmail(email, projectId, pdfUrl);
+      
+      // Clean up temp data
+      delete global.tempProjects[projectId];
+      
+      res.json({ success: true, pdfUrl });
+    } else {
+      res.status(400).json({ error: 'Payment not completed' });
+    }
+  } catch (err) {
+    console.error('Checkout success error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Confirm payment and generate PDF - authenticated
 app.post('/api/confirm-payment', authenticate, async (req, res) => {
   const { projectId, paymentIntentId } = req.body;
