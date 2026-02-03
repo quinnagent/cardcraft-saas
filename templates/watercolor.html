@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rustic Wedding Thank You Cards | Warm & Natural | CardCraft</title>
-    <meta name="description" content="Warm earthy tones and natural textures for rustic wedding thank you cards. Perfect for barn weddings and outdoor celebrations.">
+    <title>Watercolor Wedding Thank You Cards | Soft & Artistic | CardCraft</title>
+    <meta name="description" content="Dreamy watercolor gradients for artistic wedding thank you cards. Perfect for romantic and creative celebrations.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
@@ -13,24 +13,35 @@
         body { 
             font-family: 'Inter', sans-serif; 
             line-height: 1.6; 
-            color: #5a4a3a; 
-            background: #fdfcfa;
+            color: #7a6a5a; 
+            background: #fff;
         }
         .hero { 
-            background: linear-gradient(135deg, #f5f0e8 0%, #faf8f5 50%, #ffffff 100%); 
+            background: linear-gradient(180deg, #fff9f7 0%, #fdf5f0 50%, #ffffff 100%); 
             padding: 5rem 2rem; 
             text-align: center;
             position: relative;
         }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #fff9f7, #f0e0d8, #fff9f7);
+        }
         h1 { 
             font-family: 'Cormorant Garamond', serif; 
-            color: #6b5a4a; 
+            color: #c9a89a; 
             font-size: 3.5rem; 
-            font-weight: 500;
+            font-weight: 400;
             margin-bottom: 1rem;
+            font-style: italic;
+            margin-top: 1rem;
         }
         .subtitle { 
-            color: #7a6a5a; 
+            color: #9a8a7a; 
             font-size: 1.2rem; 
             max-width: 550px; 
             margin: 0 auto;
@@ -40,49 +51,62 @@
             padding: 4rem 2rem; 
             display: flex; 
             justify-content: center; 
-            background: linear-gradient(180deg, #ffffff 0%, #f5f0e8 100%);
+            background: linear-gradient(180deg, #ffffff 0%, #fff5f2 100%);
         }
         .card-preview { 
             width: 320px; 
             height: 440px; 
-            background: #fdfcfa; 
-            border: 2px dashed #b8a090; 
+            background: linear-gradient(135deg, #fff9f7 0%, #fdf5f0 50%, #f9f0eb 100%); 
             padding: 2.5rem;
             display: flex; 
             flex-direction: column; 
             justify-content: center; 
             text-align: center;
-            box-shadow: 0 15px 35px -10px rgba(107,90,74,0.1);
+            box-shadow: 0 20px 40px -15px rgba(201,168,154,0.2);
             transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .card-preview::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%);
+            opacity: 0.5;
         }
         .card-preview:hover {
-            box-shadow: 0 20px 45px -10px rgba(107,90,74,0.15);
+            box-shadow: 0 25px 50px -15px rgba(201,168,154,0.3);
         }
         .card-preview h2 { 
             font-family: 'Cormorant Garamond', serif; 
-            color: #6b5a4a; 
+            color: #c9a89a; 
             font-size: 2.2rem; 
             margin-bottom: 1.5rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
+            font-weight: 400;
+            font-style: italic;
+            position: relative;
         }
         .card-preview p {
             font-family: 'Cormorant Garamond', serif;
-            color: #5a4a3a;
+            color: #7a6a5a;
             line-height: 1.9;
+            position: relative;
         }
         .features { 
-            background: #f5f0e8; 
+            background: linear-gradient(180deg, #fff5f2 0%, #fff9f7 100%); 
             padding: 5rem 2rem;
         }
         .features h2 { 
             text-align: center; 
-            color: #6b5a4a; 
+            color: #c9a89a; 
             margin-bottom: 3rem;
             font-family: 'Cormorant Garamond', serif;
             font-size: 2.5rem;
-            font-weight: 500;
+            font-weight: 400;
+            font-style: italic;
         }
         .feature-grid { 
             display: grid; 
@@ -94,104 +118,105 @@
         .feature { 
             background: white; 
             padding: 2.5rem; 
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(107,90,74,0.08);
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(201,168,154,0.1);
             transition: all 0.2s ease;
         }
         .feature:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 24px rgba(107,90,74,0.12);
+            box-shadow: 0 8px 28px rgba(201,168,154,0.15);
         }
         .feature h3 {
             font-family: 'Cormorant Garamond', serif;
-            color: #6b5a4a;
+            color: #c9a89a;
             font-size: 1.5rem;
             margin-bottom: 1rem;
-            font-weight: 600;
+            font-weight: 500;
         }
         .feature p {
-            color: #6a5a4a;
+            color: #8a7a6a;
             line-height: 1.7;
         }
         .cta { 
             text-align: center; 
             padding: 5rem 2rem;
-            background: linear-gradient(180deg, #f5f0e8 0%, #fdfcfa 100%);
+            background: linear-gradient(180deg, #fff9f7 0%, #ffffff 100%);
         }
         .cta h2 {
             font-family: 'Cormorant Garamond', serif;
-            color: #6b5a4a; 
+            color: #c9a89a; 
             margin-bottom: 1rem;
             font-size: 2.5rem;
-            font-weight: 500;
+            font-weight: 400;
+            font-style: italic;
         }
         .cta p {
-            color: #7a6a5a;
+            color: #9a8a7a;
             margin-bottom: 2.5rem;
             font-size: 1.1rem;
         }
         .btn { 
-            background: #6b5a4a; 
+            background: #c9a89a; 
             color: white; 
             padding: 1.2rem 2.5rem; 
             text-decoration: none; 
-            border-radius: 6px; 
+            border-radius: 30px; 
             display: inline-block; 
             font-size: 1rem;
-            font-weight: 500;
-            letter-spacing: 0.02em;
+            font-weight: 400;
+            letter-spacing: 0.05em;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(107,90,74,0.3);
+            box-shadow: 0 4px 15px rgba(201,168,154,0.3);
         }
         .btn:hover {
-            background: #5b4a3a;
+            background: #b8988a;
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(107,90,74,0.4);
+            box-shadow: 0 8px 25px rgba(201,168,154,0.4);
         }
-        a { color: #6b5a4a; }
+        a { color: #c9a89a; }
     </style>
 </head>
 <body>
     <div class="hero">
-        <h1>Rustic</h1>
-        <p class="subtitle">Handcrafted charm with dashed borders and earthy warmth. For celebrations surrounded by natural beauty.</p>
+        <h1>Watercolor</h1>
+        <p class="subtitle">Dreamy gradients and soft washes of color. For celebrations painted with love and artistic flair.</p>
     </div>
     
     <div class="preview">
         <div class="card-preview">
             <h2>Thank You</h2>
-            <p style="margin-bottom: 1.2rem; font-size: 1.1rem;">Dear Sarah,</p>
-            <p style="font-size: 1rem; line-height: 1.9; font-style: italic;">Your presence at our barn wedding meant the world to us. Thank you for celebrating under the stars with us...</p>
-            <p style="margin-top: 2rem; font-size: 1.05rem;">With gratitude,<br><strong style="color: #6b5a4a;">Emma & Jake</strong></p>
+            <p style="margin-bottom: 1.2rem; font-size: 1.1rem;">Dear Lily,</p>
+            <p style="font-size: 1rem; line-height: 1.9; font-style: italic;">Thank you for adding your colors to our special day. Your creativity and joy made everything more beautiful...</p>
+            <p style="margin-top: 2rem; font-size: 1.05rem;">With love,<br><strong style="color: #c9a89a;">Isabella & Noah</strong></p>
         </div>
     </div>
     
     <div class="features">
-        <h2>Why Choose Rustic?</h2>
+        <h2>Why Choose Watercolor?</h2>
         <div class="feature-grid">
             <div class="feature">
-                <h3>🏕️ Barn Weddings</h3>
-                <p>Complements the rustic charm of barn venues, farms, and outdoor settings.</p>
+                <h3>🎨 Artistic Flair</h3>
+                <p>Soft gradients mimic the beauty of watercolor paintings. Perfect for creative couples.</p>
             </div>
             <div class="feature">
-                <h3>🌾 Country Chic</h3>
-                <p>Earthy color palette that pairs beautifully with natural, organic decor.</p>
+                <h3>Dreamy Atmosphere</h3>
+                <p>Subtle color washes create an ethereal, romantic mood for your cards.</p>
             </div>
             <div class="feature">
-                <h3>🌲 Outdoor Celebrations</h3>
-                <p>Perfect for woodland, garden, and outdoor weddings in nature's embrace.</p>
+                <h3>Artistic Venues</h3>
+                <p>Ideal for gallery spaces, studios, and celebrations with creative touches.</p>
             </div>
             <div class="feature">
-                <h3>📜 Handcrafted Feel</h3>
-                <p>Dashed border detail adds artisanal charm to your thank you cards.</p>
+                <h3>Soft Finish</h3>
+                <p>Designed to print beautifully on watercolor or textured paper stocks.</p>
             </div>
         </div>
     </div>
     
     <div class="cta">
         <h2>Create Your Cards</h2>
-        <p>Personalize your Rustic thank you cards in minutes.</p>
-        <a href="../index.html?template=rustic" class="btn">Start Creating</a>
+        <p>Personalize your Watercolor thank you cards in minutes.</p>
+        <a href="../index.html?template=watercolor" class="btn">Start Creating</a>
         <p style="margin-top: 2rem;"><a href="../index.html#templates">View All Templates</a></p>
     </div>
 </body>

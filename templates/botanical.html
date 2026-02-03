@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rustic Wedding Thank You Cards | Warm & Natural | CardCraft</title>
-    <meta name="description" content="Warm earthy tones and natural textures for rustic wedding thank you cards. Perfect for barn weddings and outdoor celebrations.">
+    <title>Botanical Wedding Thank You Cards | Nature-Inspired | CardCraft</title>
+    <meta name="description" content="Fresh sage and botanical greens for nature-inspired wedding thank you cards. Perfect for garden and outdoor weddings.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
@@ -13,24 +13,34 @@
         body { 
             font-family: 'Inter', sans-serif; 
             line-height: 1.6; 
-            color: #5a4a3a; 
-            background: #fdfcfa;
+            color: #4a5a4a; 
+            background: #fafbf9;
         }
         .hero { 
-            background: linear-gradient(135deg, #f5f0e8 0%, #faf8f5 50%, #ffffff 100%); 
+            background: linear-gradient(135deg, #f0f4f0 0%, #f5f8f5 50%, #ffffff 100%); 
             padding: 5rem 2rem; 
             text-align: center;
             position: relative;
         }
+        .hero::before {
+            content: '🌿';
+            font-size: 3rem;
+            opacity: 0.3;
+            position: absolute;
+            top: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+        }
         h1 { 
             font-family: 'Cormorant Garamond', serif; 
-            color: #6b5a4a; 
+            color: #5a7a5a; 
             font-size: 3.5rem; 
             font-weight: 500;
             margin-bottom: 1rem;
+            margin-top: 2rem;
         }
         .subtitle { 
-            color: #7a6a5a; 
+            color: #6a8a6a; 
             font-size: 1.2rem; 
             max-width: 550px; 
             margin: 0 auto;
@@ -40,45 +50,54 @@
             padding: 4rem 2rem; 
             display: flex; 
             justify-content: center; 
-            background: linear-gradient(180deg, #ffffff 0%, #f5f0e8 100%);
+            background: linear-gradient(180deg, #ffffff 0%, #f0f4f0 100%);
         }
         .card-preview { 
             width: 320px; 
             height: 440px; 
-            background: #fdfcfa; 
-            border: 2px dashed #b8a090; 
+            background: #f5f8f5; 
+            border: 2px solid #b8c8b8; 
             padding: 2.5rem;
             display: flex; 
             flex-direction: column; 
             justify-content: center; 
             text-align: center;
-            box-shadow: 0 15px 35px -10px rgba(107,90,74,0.1);
+            box-shadow: 0 15px 35px -10px rgba(90,120,90,0.15);
             transition: all 0.3s ease;
+            position: relative;
+        }
+        .card-preview::before {
+            content: '';
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            bottom: 12px;
+            border: 1px solid rgba(184,200,184,0.3);
+            pointer-events: none;
         }
         .card-preview:hover {
-            box-shadow: 0 20px 45px -10px rgba(107,90,74,0.15);
+            box-shadow: 0 20px 45px -10px rgba(90,120,90,0.25);
         }
         .card-preview h2 { 
             font-family: 'Cormorant Garamond', serif; 
-            color: #6b5a4a; 
+            color: #5a7a5a; 
             font-size: 2.2rem; 
             margin-bottom: 1.5rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
         }
         .card-preview p {
             font-family: 'Cormorant Garamond', serif;
-            color: #5a4a3a;
+            color: #4a5a4a;
             line-height: 1.9;
         }
         .features { 
-            background: #f5f0e8; 
+            background: #f0f4f0; 
             padding: 5rem 2rem;
         }
         .features h2 { 
             text-align: center; 
-            color: #6b5a4a; 
+            color: #5a7a5a; 
             margin-bottom: 3rem;
             font-family: 'Cormorant Garamond', serif;
             font-size: 2.5rem;
@@ -95,43 +114,43 @@
             background: white; 
             padding: 2.5rem; 
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(107,90,74,0.08);
+            box-shadow: 0 4px 12px rgba(90,120,90,0.08);
             transition: all 0.2s ease;
         }
         .feature:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 24px rgba(107,90,74,0.12);
+            box-shadow: 0 8px 24px rgba(90,120,90,0.12);
         }
         .feature h3 {
             font-family: 'Cormorant Garamond', serif;
-            color: #6b5a4a;
+            color: #5a7a5a;
             font-size: 1.5rem;
             margin-bottom: 1rem;
             font-weight: 600;
         }
         .feature p {
-            color: #6a5a4a;
+            color: #5a6a5a;
             line-height: 1.7;
         }
         .cta { 
             text-align: center; 
             padding: 5rem 2rem;
-            background: linear-gradient(180deg, #f5f0e8 0%, #fdfcfa 100%);
+            background: linear-gradient(180deg, #f0f4f0 0%, #ffffff 100%);
         }
         .cta h2 {
             font-family: 'Cormorant Garamond', serif;
-            color: #6b5a4a; 
+            color: #5a7a5a; 
             margin-bottom: 1rem;
             font-size: 2.5rem;
             font-weight: 500;
         }
         .cta p {
-            color: #7a6a5a;
+            color: #6a8a6a;
             margin-bottom: 2.5rem;
             font-size: 1.1rem;
         }
         .btn { 
-            background: #6b5a4a; 
+            background: #5a7a5a; 
             color: white; 
             padding: 1.2rem 2.5rem; 
             text-decoration: none; 
@@ -141,57 +160,57 @@
             font-weight: 500;
             letter-spacing: 0.02em;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(107,90,74,0.3);
+            box-shadow: 0 4px 15px rgba(90,120,90,0.3);
         }
         .btn:hover {
-            background: #5b4a3a;
+            background: #4a6a4a;
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(107,90,74,0.4);
+            box-shadow: 0 8px 25px rgba(90,120,90,0.4);
         }
-        a { color: #6b5a4a; }
+        a { color: #5a7a5a; }
     </style>
 </head>
 <body>
     <div class="hero">
-        <h1>Rustic</h1>
-        <p class="subtitle">Handcrafted charm with dashed borders and earthy warmth. For celebrations surrounded by natural beauty.</p>
+        <h1>Botanical</h1>
+        <p class="subtitle">Fresh sage greens and natural textures. For celebrations surrounded by nature's beauty and organic elegance.</p>
     </div>
     
     <div class="preview">
         <div class="card-preview">
             <h2>Thank You</h2>
-            <p style="margin-bottom: 1.2rem; font-size: 1.1rem;">Dear Sarah,</p>
-            <p style="font-size: 1rem; line-height: 1.9; font-style: italic;">Your presence at our barn wedding meant the world to us. Thank you for celebrating under the stars with us...</p>
-            <p style="margin-top: 2rem; font-size: 1.05rem;">With gratitude,<br><strong style="color: #6b5a4a;">Emma & Jake</strong></p>
+            <p style="margin-bottom: 1.2rem; font-size: 1.1rem;">Dear Sophie,</p>
+            <p style="font-size: 1rem; line-height: 1.9; font-style: italic;">Thank you for sharing our special day surrounded by nature's beauty. Your presence meant the world to us...</p>
+            <p style="margin-top: 2rem; font-size: 1.05rem;">With gratitude,<br><strong style="color: #5a7a5a;">Maya & James</strong></p>
         </div>
     </div>
     
     <div class="features">
-        <h2>Why Choose Rustic?</h2>
+        <h2>Why Choose Botanical?</h2>
         <div class="feature-grid">
             <div class="feature">
-                <h3>🏕️ Barn Weddings</h3>
-                <p>Complements the rustic charm of barn venues, farms, and outdoor settings.</p>
+                <h3>🌿 Natural Palette</h3>
+                <p>Fresh sage and forest greens that bring the outdoors in. Perfect for nature lovers.</p>
             </div>
             <div class="feature">
-                <h3>🌾 Country Chic</h3>
-                <p>Earthy color palette that pairs beautifully with natural, organic decor.</p>
+                <h3>Organic Feel</h3>
+                <p>Subtle inner border detail evokes pressed botanicals and garden frames.</p>
             </div>
             <div class="feature">
-                <h3>🌲 Outdoor Celebrations</h3>
-                <p>Perfect for woodland, garden, and outdoor weddings in nature's embrace.</p>
+                <h3>Earth-Friendly</h3>
+                <p>Designed to complement recycled and eco-friendly paper stocks beautifully.</p>
             </div>
             <div class="feature">
-                <h3>📜 Handcrafted Feel</h3>
-                <p>Dashed border detail adds artisanal charm to your thank you cards.</p>
+                <h3>Perfect Venues</h3>
+                <p>Ideal for garden weddings, forest celebrations, and outdoor receptions.</p>
             </div>
         </div>
     </div>
     
     <div class="cta">
         <h2>Create Your Cards</h2>
-        <p>Personalize your Rustic thank you cards in minutes.</p>
-        <a href="../index.html?template=rustic" class="btn">Start Creating</a>
+        <p>Personalize your Botanical thank you cards in minutes.</p>
+        <a href="../index.html?template=botanical" class="btn">Start Creating</a>
         <p style="margin-top: 2rem;"><a href="../index.html#templates">View All Templates</a></p>
     </div>
 </body>

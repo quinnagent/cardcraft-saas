@@ -3,34 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rustic Wedding Thank You Cards | Warm & Natural | CardCraft</title>
-    <meta name="description" content="Warm earthy tones and natural textures for rustic wedding thank you cards. Perfect for barn weddings and outdoor celebrations.">
+    <title>Romantic Blush Wedding Thank You Cards | Soft & Dreamy | CardCraft</title>
+    <meta name="description" content="Soft blush and rose gold tones for romantic wedding thank you cards. Perfect for garden weddings and intimate celebrations.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             font-family: 'Inter', sans-serif; 
             line-height: 1.6; 
-            color: #5a4a3a; 
-            background: #fdfcfa;
+            color: #8b6b5a; 
+            background: #fff;
         }
         .hero { 
-            background: linear-gradient(135deg, #f5f0e8 0%, #faf8f5 50%, #ffffff 100%); 
+            background: linear-gradient(180deg, #fff5f2 0%, #fff9f7 50%, #ffffff 100%); 
             padding: 5rem 2rem; 
             text-align: center;
             position: relative;
         }
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e8d4cc, transparent);
+        }
         h1 { 
             font-family: 'Cormorant Garamond', serif; 
-            color: #6b5a4a; 
+            color: #c9a89a; 
             font-size: 3.5rem; 
-            font-weight: 500;
+            font-weight: 400;
             margin-bottom: 1rem;
+            font-style: italic;
         }
         .subtitle { 
-            color: #7a6a5a; 
+            color: #a08070; 
             font-size: 1.2rem; 
             max-width: 550px; 
             margin: 0 auto;
@@ -40,49 +51,49 @@
             padding: 4rem 2rem; 
             display: flex; 
             justify-content: center; 
-            background: linear-gradient(180deg, #ffffff 0%, #f5f0e8 100%);
+            background: linear-gradient(180deg, #ffffff 0%, #fff5f2 100%);
         }
         .card-preview { 
             width: 320px; 
             height: 440px; 
-            background: #fdfcfa; 
-            border: 2px dashed #b8a090; 
+            background: linear-gradient(180deg, #fff9f7 0%, #fdf5f0 100%); 
+            border: 1px solid #f0e0d8;
             padding: 2.5rem;
             display: flex; 
             flex-direction: column; 
             justify-content: center; 
             text-align: center;
-            box-shadow: 0 15px 35px -10px rgba(107,90,74,0.1);
+            box-shadow: 0 20px 40px -15px rgba(201,168,154,0.2);
             transition: all 0.3s ease;
         }
         .card-preview:hover {
-            box-shadow: 0 20px 45px -10px rgba(107,90,74,0.15);
+            box-shadow: 0 25px 50px -15px rgba(201,168,154,0.3);
         }
         .card-preview h2 { 
             font-family: 'Cormorant Garamond', serif; 
-            color: #6b5a4a; 
+            color: #c9a89a; 
             font-size: 2.2rem; 
             margin-bottom: 1.5rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
+            font-weight: 400;
+            font-style: italic;
         }
         .card-preview p {
             font-family: 'Cormorant Garamond', serif;
-            color: #5a4a3a;
+            color: #8b6b5a;
             line-height: 1.9;
         }
         .features { 
-            background: #f5f0e8; 
+            background: #fff9f7; 
             padding: 5rem 2rem;
         }
         .features h2 { 
             text-align: center; 
-            color: #6b5a4a; 
+            color: #c9a89a; 
             margin-bottom: 3rem;
             font-family: 'Cormorant Garamond', serif;
             font-size: 2.5rem;
-            font-weight: 500;
+            font-weight: 400;
+            font-style: italic;
         }
         .feature-grid { 
             display: grid; 
@@ -94,104 +105,111 @@
         .feature { 
             background: white; 
             padding: 2.5rem; 
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(107,90,74,0.08);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(201,168,154,0.08);
             transition: all 0.2s ease;
         }
         .feature:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 24px rgba(107,90,74,0.12);
+            box-shadow: 0 8px 24px rgba(201,168,154,0.12);
         }
         .feature h3 {
             font-family: 'Cormorant Garamond', serif;
-            color: #6b5a4a;
+            color: #c9a89a;
             font-size: 1.5rem;
             margin-bottom: 1rem;
-            font-weight: 600;
+            font-weight: 500;
         }
         .feature p {
-            color: #6a5a4a;
+            color: #8b6b5a;
             line-height: 1.7;
         }
         .cta { 
             text-align: center; 
             padding: 5rem 2rem;
-            background: linear-gradient(180deg, #f5f0e8 0%, #fdfcfa 100%);
+            background: linear-gradient(180deg, #fff9f7 0%, #ffffff 100%);
         }
         .cta h2 {
             font-family: 'Cormorant Garamond', serif;
-            color: #6b5a4a; 
+            color: #c9a89a; 
             margin-bottom: 1rem;
             font-size: 2.5rem;
-            font-weight: 500;
+            font-weight: 400;
+            font-style: italic;
         }
         .cta p {
-            color: #7a6a5a;
+            color: #a08070;
             margin-bottom: 2.5rem;
             font-size: 1.1rem;
         }
         .btn { 
-            background: #6b5a4a; 
+            background: #c9a89a; 
             color: white; 
             padding: 1.2rem 2.5rem; 
             text-decoration: none; 
-            border-radius: 6px; 
+            border-radius: 30px; 
             display: inline-block; 
             font-size: 1rem;
-            font-weight: 500;
-            letter-spacing: 0.02em;
+            font-weight: 400;
+            letter-spacing: 0.05em;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(107,90,74,0.3);
+            box-shadow: 0 4px 15px rgba(201,168,154,0.3);
         }
         .btn:hover {
-            background: #5b4a3a;
+            background: #b8988a;
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(107,90,74,0.4);
+            box-shadow: 0 8px 25px rgba(201,168,154,0.4);
         }
-        a { color: #6b5a4a; }
+        a { color: #c9a89a; }
+        .flourish {
+            font-size: 1.5rem;
+            color: #e8d4cc;
+            margin: 1.5rem 0;
+        }
     </style>
 </head>
 <body>
     <div class="hero">
-        <h1>Rustic</h1>
-        <p class="subtitle">Handcrafted charm with dashed borders and earthy warmth. For celebrations surrounded by natural beauty.</p>
+        <h1>Romantic Blush</h1>
+        <div class="flourish">✦</div>
+        <p class="subtitle">Soft gradients of blush and rose gold. For weddings that celebrate love with gentle romance and ethereal beauty.</p>
     </div>
     
     <div class="preview">
         <div class="card-preview">
             <h2>Thank You</h2>
-            <p style="margin-bottom: 1.2rem; font-size: 1.1rem;">Dear Sarah,</p>
-            <p style="font-size: 1rem; line-height: 1.9; font-style: italic;">Your presence at our barn wedding meant the world to us. Thank you for celebrating under the stars with us...</p>
-            <p style="margin-top: 2rem; font-size: 1.05rem;">With gratitude,<br><strong style="color: #6b5a4a;">Emma & Jake</strong></p>
+            <p style="margin-bottom: 1.2rem; font-size: 1.1rem;">Dear Emma,</p>
+            <p style="font-size: 1rem; line-height: 1.9; font-style: italic;">Your presence at our wedding filled our hearts with joy. Thank you for your love and support as we begin this new chapter...</p>
+            <p style="margin-top: 2rem; font-size: 1.05rem;">With love,<br><strong style="color: #c9a89a;">Olivia & Thomas</strong></p>
         </div>
     </div>
     
     <div class="features">
-        <h2>Why Choose Rustic?</h2>
+        <h2>Why Choose Romantic Blush?</h2>
         <div class="feature-grid">
             <div class="feature">
-                <h3>🏕️ Barn Weddings</h3>
-                <p>Complements the rustic charm of barn venues, farms, and outdoor settings.</p>
+                <h3>Dreamy Palette</h3>
+                <p>Soft gradients from blush to rose gold create an ethereal, romantic atmosphere.</p>
             </div>
             <div class="feature">
-                <h3>🌾 Country Chic</h3>
-                <p>Earthy color palette that pairs beautifully with natural, organic decor.</p>
+                <h3>Elegant Script</h3>
+                <p>Italic serif typography adds a touch of timeless romance and sophistication.</p>
             </div>
             <div class="feature">
-                <h3>🌲 Outdoor Celebrations</h3>
-                <p>Perfect for woodland, garden, and outdoor weddings in nature's embrace.</p>
+                <h3>Perfect For</h3>
+                <p>Garden weddings, vineyard celebrations, and intimate romantic venues.</p>
             </div>
             <div class="feature">
-                <h3>📜 Handcrafted Feel</h3>
-                <p>Dashed border detail adds artisanal charm to your thank you cards.</p>
+                <h3>Soft Finish</h3>
+                <p>Designed to print beautifully on soft white or cream textured paper stocks.</p>
             </div>
         </div>
     </div>
     
     <div class="cta">
         <h2>Create Your Cards</h2>
-        <p>Personalize your Rustic thank you cards in minutes.</p>
-        <a href="../index.html?template=rustic" class="btn">Start Creating</a>
+        <p>Personalize your Romantic Blush thank you cards in minutes.</p>
+        <a href="../index.html?template=romantic" class="btn">Start Creating</a>
         <p style="margin-top: 2rem;"><a href="../index.html#templates">View All Templates</a></p>
     </div>
 </body>

@@ -3,40 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Classic Elegance Wedding Thank You Card Template | Timeless & Refined | CardCraft</title>
-    <meta name="description" content="Create timeless wedding thank you cards with our Classic Elegance template. Double border design with elegant serif typography. Personalize and print in minutes.">
-    <meta name="keywords" content="classic wedding thank you cards, elegant thank you card template, traditional wedding stationery, serif font thank you cards">
-    <link rel="canonical" href="https://quinnagent.github.io/cardcraft-saas/templates/classic-elegance">
+    <title>Classic Elegance Wedding Thank You Cards | Timeless & Sophisticated | CardCraft</title>
+    <meta name="description" content="Create timeless wedding thank you cards with our Classic Elegance template. Double border design with refined serif typography. Perfect for traditional weddings.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; line-height: 1.6; color: #3d3d3d; }
-        .hero { background: linear-gradient(135deg, #f8f6f3 0%, #ffffff 100%); padding: 4rem 2rem; text-align: center; }
-        h1 { font-family: 'Playfair Display', serif; color: #5c4a3d; font-size: 2.5rem; margin-bottom: 1rem; }
-        .subtitle { color: #666; font-size: 1.2rem; max-width: 600px; margin: 0 auto; }
-        .preview { padding: 3rem 2rem; display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; }
-        .card-preview { width: 300px; height: 400px; background: #fefefe; border: 3px double #c9b8a8; padding: 2rem; display: flex; flex-direction: column; justify-content: center; text-align: center; }
-        .card-preview h2 { font-family: 'Playfair Display', serif; color: #5c4a3d; font-size: 2rem; margin-bottom: 1rem; }
-        .features { background: #f8f6f3; padding: 3rem 2rem; }
-        .features h2 { text-align: center; color: #5c4a3d; margin-bottom: 2rem; }
-        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; max-width: 1000px; margin: 0 auto; }
-        .feature { background: white; padding: 1.5rem; border-radius: 8px; }
-        .cta { text-align: center; padding: 3rem 2rem; }
-        .btn { background: #5c4a3d; color: white; padding: 1rem 2rem; text-decoration: none; border-radius: 4px; display: inline-block; font-size: 1.1rem; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            color: #4a4a4a; 
+            background: #fafafa;
+        }
+        .hero { 
+            background: linear-gradient(135deg, #f5f2ed 0%, #ffffff 50%, #f8f6f3 100%); 
+            padding: 5rem 2rem; 
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9b8a8' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+        h1 { 
+            font-family: 'Cormorant Garamond', serif; 
+            color: #5c4a3d; 
+            font-size: 3.5rem; 
+            font-weight: 500;
+            margin-bottom: 1rem;
+            position: relative;
+            letter-spacing: -0.02em;
+        }
+        .subtitle { 
+            color: #7a6b5f; 
+            font-size: 1.25rem; 
+            max-width: 600px; 
+            margin: 0 auto;
+            font-weight: 300;
+            line-height: 1.7;
+        }
+        .preview { 
+            padding: 4rem 2rem; 
+            display: flex; 
+            justify-content: center; 
+            gap: 3rem; 
+            flex-wrap: wrap;
+            background: linear-gradient(180deg, #fafafa 0%, #f5f2ed 100%);
+        }
+        .card-preview { 
+            width: 320px; 
+            height: 440px; 
+            background: #fefefe; 
+            border: 3px double #c9b8a8; 
+            padding: 2.5rem;
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            text-align: center;
+            box-shadow: 
+                0 1px 1px rgba(0,0,0,0.02),
+                0 2px 2px rgba(0,0,0,0.02),
+                0 4px 4px rgba(0,0,0,0.02),
+                0 8px 8px rgba(0,0,0,0.02),
+                0 16px 16px rgba(0,0,0,0.02);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-preview:hover {
+            transform: translateY(-4px);
+            box-shadow: 
+                0 2px 4px rgba(0,0,0,0.02),
+                0 4px 8px rgba(0,0,0,0.02),
+                0 8px 16px rgba(0,0,0,0.02),
+                0 16px 32px rgba(0,0,0,0.02),
+                0 32px 64px rgba(0,0,0,0.03);
+        }
+        .card-preview h2 { 
+            font-family: 'Cormorant Garamond', serif; 
+            color: #5c4a3d; 
+            font-size: 2.2rem; 
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+        }
+        .card-preview p {
+            font-family: 'Cormorant Garamond', serif;
+            color: #6b5a4a;
+            line-height: 1.8;
+        }
+        .features { 
+            background: #f5f2ed; 
+            padding: 5rem 2rem; 
+            position: relative;
+        }
+        .features h2 { 
+            text-align: center; 
+            color: #5c4a3d; 
+            margin-bottom: 3rem;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            font-weight: 500;
+        }
+        .feature-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 2rem; 
+            max-width: 1100px; 
+            margin: 0 auto; 
+        }
+        .feature { 
+            background: white; 
+            padding: 2.5rem; 
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .feature:hover {
+            transform: translateY(-2px);
+        }
+        .feature h3 {
+            font-family: 'Cormorant Garamond', serif;
+            color: #5c4a3d;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        .feature p {
+            color: #7a6b5f;
+            line-height: 1.7;
+        }
+        .cta { 
+            text-align: center; 
+            padding: 5rem 2rem;
+            background: linear-gradient(180deg, #f5f2ed 0%, #fafafa 100%);
+        }
+        .cta h2 {
+            font-family: 'Cormorant Garamond', serif;
+            color: #5c4a3d; 
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+            font-weight: 500;
+        }
+        .cta p {
+            color: #7a6b5f;
+            margin-bottom: 2.5rem;
+            font-size: 1.1rem;
+        }
+        .btn { 
+            background: #5c4a3d; 
+            color: white; 
+            padding: 1.2rem 2.5rem; 
+            text-decoration: none; 
+            border-radius: 6px; 
+            display: inline-block; 
+            font-size: 1.1rem;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(92,74,61,0.2);
+        }
+        .btn:hover {
+            background: #4a3d32;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px -2px rgba(92,74,61,0.25);
+        }
         a { color: #5c4a3d; }
+        .ornament {
+            width: 60px;
+            height: 1px;
+            background: #c9b8a8;
+            margin: 2rem auto;
+        }
     </style>
 </head>
 <body>
     <div class="hero">
-        <h1>Classic Elegance Wedding Thank You Cards</h1>
-        <p class="subtitle">Timeless double-border design with elegant serif typography. Perfect for traditional weddings and sophisticated celebrations.</p>
+        <h1>Classic Elegance</h1>
+        <div class="ornament"></div>
+        <p class="subtitle">Timeless double-border design with refined serif typography. For weddings that embrace tradition with understated sophistication.</p>
     </div>
     
     <div class="preview">
         <div class="card-preview">
             <h2>Thank You</h2>
-            <p style="font-family: 'Cormorant Garamond', serif; margin-bottom: 1rem;">Dear Michael,</p>
-            <p style="font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; line-height: 1.6;">Thank you for your generous gift and for celebrating our special day with us...</p>
-            <p style="margin-top: 1rem; font-style: italic;">With love,<br>Collin & Annika</p>
+            <p style="margin-bottom: 1.2rem; font-size: 1.1rem;">Dear Michael,</p>
+            <p style="font-size: 1rem; line-height: 1.9; font-style: italic;">Thank you for your generous gift and for celebrating our special day with us. Your presence meant the world...</p>
+            <p style="margin-top: 2rem; font-size: 1.05rem;">With love,<br><strong style="color: #5c4a3d;">Sarah & James</strong></p>
         </div>
     </div>
     
@@ -44,28 +203,28 @@
         <h2>Why Choose Classic Elegance?</h2>
         <div class="feature-grid">
             <div class="feature">
-                <h3>🎨 Timeless Design</h3>
-                <p>Double border with warm neutral tones that never go out of style. Perfect for formal and semi-formal weddings.</p>
+                <h3>Timeless Design</h3>
+                <p>Double border with warm neutral tones that transcend trends. Perfect for formal and semi-formal celebrations alike.</p>
             </div>
             <div class="feature">
-                <h3>✍️ Elegant Typography</h3>
-                <p>Classic serif fonts including Playfair Display and Cormorant Garamond for that sophisticated feel.</p>
+                <h3>Refined Typography</h3>
+                <p>Classic Cormorant Garamond serif fonts that evoke the feel of letterpress stationery.</p>
             </div>
             <div class="feature">
-                <h3>📐 Perfect Dimensions</h3>
-                <p>Standard 4.25" x 5.5" cards that fit perfectly in A2 envelopes.</p>
+                <h3>Perfect Proportions</h3>
+                <p>Standard 4.25" × 5.5" cards that fit beautifully in A2 envelopes.</p>
             </div>
             <div class="feature">
-                <h3>🖨️ Print Ready</h3>
-                <p>High-resolution PDFs formatted for easy home or professional printing.</p>
+                <h3>Print-Ready Quality</h3>
+                <p>High-resolution PDFs formatted for flawless home or professional printing.</p>
             </div>
         </div>
     </div>
     
     <div class="cta">
-        <h2 style="color: #5c4a3d; margin-bottom: 1rem;">Ready to Create Your Cards?</h2>
-        <p style="margin-bottom: 2rem; color: #666;">Choose the Classic Elegance template and personalize your thank you cards in minutes.</p>
-        <a href="../index.html?template=classic" class="btn">Use This Template</a>
+        <h2>Create Your Cards</h2>
+        <p>Personalize your Classic Elegance thank you cards in minutes.</p>
+        <a href="../index.html?template=classic" class="btn">Start Creating</a>
         <p style="margin-top: 2rem;"><a href="../index.html#templates">View All Templates</a></p>
     </div>
 </body>
