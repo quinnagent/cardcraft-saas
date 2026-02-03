@@ -844,11 +844,17 @@ async function sendDownloadEmail(email, projectId, pdfUrl) {
   };
 
   try {
-    await emailTransporter.sendMail(mailOptions);
-    console.log(`Download email sent to ${email}`);
+    console.log('Attempting to send email to:', email);
+    console.log('Using SMTP service:', process.env.EMAIL_SERVICE || 'gmail');
+    const result = await emailTransporter.sendMail(mailOptions);
+    console.log('Email sent successfully:', result.messageId);
     return true;
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('Error sending email:');
+    console.error('  Message:', error.message);
+    console.error('  Code:', error.code);
+    console.error('  Command:', error.command);
+    console.error('  Response:', error.response);
     return false;
   }
 }
