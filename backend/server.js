@@ -881,65 +881,63 @@ async function generatePDFSimple(project, projectId) {
   });
   const page = await browser.newPage();
   
-  // Calculate dimensions based on cards per page
-  // Added padding and gaps to prevent borders from being cut off during printing
-  let gridStyles, cardStyles, pagePadding;
+  // Page dimensions: 8.5 x 11 inches letter size
+  // With 0.25in margins on all sides, printable area is 8 x 10.5 inches
+  const pageWidth = 8; // inches
+  const pageHeight = 10.5; // inches
+  const margin = 0.25; // inches
+  const gap = 0.15; // inches between cards
+  
+  let cardWidth, cardHeight, cardsAcross, cardsDown, scale;
   
   if (cardsPerPage === 1) {
-    // 1 card per page - centered with margin
-    pagePadding = '0.5in';
-    gridStyles = `grid-template-columns: 1fr; grid-template-rows: 1fr; gap: 0; padding: ${pagePadding};`;
-    cardStyles = 'width: 7in; height: 9in; padding: 0.75in; margin: auto;';
+    // 1 card centered on page
+    cardWidth = 6;
+    cardHeight = 8;
+    cardsAcross = 1;
+    cardsDown = 1;
   } else if (cardsPerPage === 2) {
-    // 2 cards per page - horizontal layout
-    pagePadding = '0.4in';
-    gridStyles = `grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; gap: 0.25in; padding: ${pagePadding};`;
-    cardStyles = 'width: 7.5in; height: 4.5in; padding: 0.4in; margin: auto;';
+    // 2 cards stacked vertically
+    cardWidth = 7;
+    cardHeight = 4.5;
+    cardsAcross = 1;
+    cardsDown = 2;
   } else {
-    // 4 cards per page - most common, add gap for cutting
-    pagePadding = '0.25in';
-    gridStyles = `grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 0.2in; padding: ${pagePadding};`;
-    // Slightly smaller cards (4.1in x 5.3in instead of 4.25in x 5.5in) to fit with gaps
-    cardStyles = 'width: 4.1in; height: 5.3in; padding: 0.4in; margin: auto;';
+    // 4 cards in 2x2 grid
+    cardsAcross = 2;
+    cardsDown = 2;
+    // Calculate card size to fit with gaps
+    cardWidth = (pageWidth - (margin * 2) - gap) / cardsAcross;
+    cardHeight = (pageHeight - (margin * 2) - gap) / cardsDown;
   }
   
-  let htmlContent = `
-    <html>
-    <head>
-      <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-      <style>
-        @page { size: letter; margin: 0.25in; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Cormorant Garamond', serif; }
-        .sheet { 
-          width: 8in; 
-          height: 10.5in; 
-          display: grid; 
-          ${gridStyles} 
-          page-break-after: always; 
-          align-content: center;
-          justify-content: center;
-        }
-        .card { 
-          display: flex; 
-          flex-direction: column; 
-          justify-content: center; 
-          position: relative; 
-          ${cardStyles} 
-          box-sizing: border-box;
-        }
-        ${template.styles}
-      </style>
-    </head>
-    <body>
-  `;
+  // Build the page HTML using absolute positioning for precise layout
+  let pagesHtml = '';
   
-  for (let i = 0; i < cards.length; i += cardsPerPage) {
-    htmlContent += '<div class="sheet">';
-    for (let j = i; j < i + cardsPerPage && j < cards.length; j++) {
-      const card = cards[j];
-      htmlContent += `
-        <div class="card">
+  for (let pageIndex = 0; pageIndex < cards.length; pageIndex += cardsPerPage) {
+    let cardsHtml = '';
+    
+    for (let i = 0; i < cardsPerPage; i++) {
+      const cardIndex = pageIndex + i;
+      if (cardIndex >= cards.length) break;
+      
+      const card = cards[cardIndex];
+      
+      // Calculate position
+      const col = i % cardsAcross;
+      const row = Math.floor(i / cardsAcross);
+      
+      const left = margin + (col * (cardWidth + gap));
+      const top = margin + (row * (cardHeight + gap));
+      
+      cardsHtml += `
+        <div class="card" style="
+          position: absolute;
+          left: ${left}in;
+          top: ${top}in;
+          width: ${cardWidth}in;
+          height: ${cardHeight}in;
+        ">
           <div class="header">Thank You</div>
           <div class="recipient">Dear ${card.recipient_name},</div>
           <div class="message">${card.message}</div>
@@ -950,16 +948,108 @@ async function generatePDFSimple(project, projectId) {
         </div>
       `;
     }
-    for (let j = cards.length; j < i + cardsPerPage; j++) {
-      htmlContent += '<div class="card"></div>';
-    }
-    htmlContent += '</div>';
+    
+    pagesHtml += `
+      <div class="page" style="
+        position: relative;
+        width: ${pageWidth}in;
+        height: ${pageHeight}in;
+        page-break-after: always;
+        overflow: hidden;
+      ">
+        ${cardsHtml}
+      </div>
+    `;
   }
   
-  htmlContent += '</body></html>';
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+      <style>
+        @page {
+          size: letter;
+          margin: 0.25in;
+        }
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        body {
+          font-family: 'Cormorant Garamond', serif;
+          margin: 0;
+          padding: 0;
+        }
+        .card {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          padding: 0.3in;
+          overflow: hidden;
+        }
+        .header {
+          font-family: 'Playfair Display', serif;
+          font-size: 32px;
+          color: #5c4a3d;
+          text-align: center;
+          margin-bottom: 0.2in;
+        }
+        .recipient {
+          font-family: 'Cormorant Garamond', serif;
+          font-size: 14px;
+          color: #4a3f35;
+          text-align: center;
+          margin-bottom: 0.15in;
+          font-weight: 500;
+        }
+        .message {
+          font-family: 'Cormorant Garamond', serif;
+          font-size: 11px;
+          line-height: 1.6;
+          color: #3d3d3d;
+          text-align: center;
+          flex: 1;
+          display: flex;
+          align-items: center;
+          max-width: 100%;
+        }
+        .signature {
+          text-align: center;
+          margin-top: 0.2in;
+        }
+        .signature-text {
+          font-family: 'Cormorant Garamond', serif;
+          font-size: 10px;
+          color: #6b5a4a;
+          font-style: italic;
+        }
+        .names {
+          font-family: 'Playfair Display', serif;
+          font-size: 20px;
+          color: #5c4a3d;
+          margin-top: 0.05in;
+        }
+        ${template.styles}
+      </style>
+    </head>
+    <body>
+      ${pagesHtml}
+    </body>
+    </html>
+  `;
   
   await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-  await page.pdf({ path: pdfPath, format: 'letter', printBackground: true });
+  await page.pdf({
+    path: pdfPath,
+    width: '8.5in',
+    height: '11in',
+    printBackground: true,
+    preferCSSPageSize: true
+  });
   await browser.close();
   
   return pdfPath;
