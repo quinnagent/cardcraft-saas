@@ -679,7 +679,14 @@ function openPayment(plan) {
     const templateNames = {
         classic: 'Classic Elegance',
         modern: 'Modern Minimal',
-        romantic: 'Romantic Blush'
+        romantic: 'Romantic Blush',
+        botanical: 'Botanical',
+        vintage: 'Vintage Charm',
+        champagne: 'Champagne Luxe',
+        rustic: 'Rustic',
+        watercolor: 'Watercolor',
+        formal: 'Formal',
+        minimal: 'Minimal'
     };
     
     const planNames = {
@@ -688,8 +695,10 @@ function openPayment(plan) {
         unlimited: 'Unlimited'
     };
     
+    const guestCount = currentState.guests?.length || 0;
+    
     document.getElementById('orderTemplate').textContent = templateNames[currentState.template] || 'Classic Elegance';
-    document.getElementById('orderCardCount').textContent = currentState.guests.length + ' cards';
+    document.getElementById('orderCardCount').textContent = guestCount + ' cards';
     document.getElementById('orderPlan').textContent = planNames[plan] || 'Premium';
     document.getElementById('orderTotal').textContent = price;
     
