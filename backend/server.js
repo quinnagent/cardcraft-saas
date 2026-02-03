@@ -228,7 +228,7 @@ const authenticate = (req, res, next) => {
 };
 
 // Templates
-const templates = {
+const templates = require('./templates');
   classic: {
     name: 'Classic Elegance',
     styles: `
@@ -337,20 +337,6 @@ const templates = {
       .names { font-family: 'Playfair Display', serif; font-size: 24px; color: #5c4a3d; margin-top: 5px; }
     `
   },
-  minimal: {
-    name: 'Minimal',
-    styles: `
-      .card { background: white; border: 1px solid #e5e5e5; padding: 40px; display: flex; flex-direction: column; justify-content: center; }
-      .header { font-family: 'Inter', sans-serif; font-size: 28px; color: #2d2d2d; text-align: center; margin-bottom: 20px; letter-spacing: 2px; text-transform: uppercase; }
-      .recipient { font-family: 'Inter', sans-serif; font-size: 14px; color: #5a5a5a; text-align: center; margin-bottom: 15px; }
-      .message { font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.8; color: #3d3d3d; text-align: center; }
-      .signature { text-align: center; margin-top: 25px; }
-      .signature-text { font-family: 'Inter', sans-serif; font-size: 11px; color: #7a7a7a; }
-      .names { font-family: 'Playfair Display', serif; font-size: 26px; color: #4a4a4a; margin-top: 5px; }
-    `
-  }
-};
-
 // Routes
 
 // Auth
