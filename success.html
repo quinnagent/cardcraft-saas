@@ -146,11 +146,7 @@
             // Optional: Call backend to confirm payment and trigger PDF generation
             const API_URL = 'https://pacific-vision-production.up.railway.app/api';
             
-            fetch(`${API_URL}/payment-success`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ session_id: sessionId })
-            })
+            fetch(`${API_URL}/checkout-success?session_id=${sessionId}`)
             .then(response => response.json())
             .then(data => {
                 console.log('Payment confirmed:', data);
