@@ -779,7 +779,10 @@ async function generatePDFSimple(project, projectId) {
     fs.mkdirSync(path.join(__dirname, 'pdfs'));
   }
   
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || process.env.CHROME_BIN || '/usr/bin/chromium',
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+  });
   const page = await browser.newPage();
   
   // Calculate dimensions based on cards per page
