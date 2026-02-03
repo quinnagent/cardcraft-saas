@@ -669,7 +669,7 @@ function showPreviewExamples() {
 // Payment
 function openPayment(plan) {
     currentState.currentPlan = plan;
-    const prices = { starter: 1, premium: 39, unlimited: 79 };
+    const prices = { starter: 19, premium: 39, unlimited: 79 };
     const price = prices[plan];
     
     // Update order summary
