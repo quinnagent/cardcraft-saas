@@ -1057,7 +1057,7 @@ app.get('/api/test-openrouter', async (req, res) => {
 });
 
 // Serve PDFs statically
-app.use('/pdfs', express.static(path.join(__dirname, 'pdfs')));
+app.use('/api/pdfs', express.static(path.join(__dirname, 'pdfs')));
 
 app.listen(PORT, () => {
   console.log(`🎨 CardCraft API running on port ${PORT}`);
