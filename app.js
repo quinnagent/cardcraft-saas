@@ -668,6 +668,17 @@ function showPreviewExamples() {
 
 // Payment
 function openPayment(plan) {
+    // Check if user has created cards first
+    if (!currentState.template) {
+        alert('Please select a template first. Click "Browse Templates" to get started.');
+        return;
+    }
+    
+    if (!currentState.guests || currentState.guests.length === 0) {
+        alert('Please upload your guest list before purchasing. Click "Upload Guest List" to add your recipients.');
+        return;
+    }
+    
     currentState.currentPlan = plan;
     const prices = { starter: 19, premium: 39, unlimited: 79 };
     const price = prices[plan];
