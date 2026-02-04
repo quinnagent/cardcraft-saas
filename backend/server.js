@@ -443,7 +443,7 @@ app.post('/api/generate-ai-messages', async (req, res) => {
 app.post('/api/create-payment', authenticate, async (req, res) => {
   const { projectId, plan } = req.body;
   
-  const prices = { starter: 100, premium: 3900, unlimited: 7900 };
+  const prices = { starter: 1900, premium: 3900, unlimited: 7900 };
   const amount = prices[plan];
   
   try {
@@ -463,7 +463,7 @@ app.post('/api/create-payment', authenticate, async (req, res) => {
 app.post('/api/create-payment-intent', async (req, res) => {
   const { plan, email, guests, template } = req.body;
   
-  const prices = { starter: 100, premium: 3900, unlimited: 7900 };
+  const prices = { starter: 1900, premium: 3900, unlimited: 7900 };
   const amount = prices[plan];
   
   if (!amount) {
@@ -505,7 +505,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
   const { plan, email, guests, template } = req.body;
   
   const planDetails = {
-    starter: { amount: 100, name: 'Starter Package', description: 'Up to 25 cards' },
+    starter: { amount: 1900, name: 'Starter Package', description: 'Up to 25 cards' },
     premium: { amount: 3900, name: 'Premium Package', description: 'Up to 75 cards' },
     unlimited: { amount: 7900, name: 'Unlimited Package', description: 'Unlimited cards' }
   };
