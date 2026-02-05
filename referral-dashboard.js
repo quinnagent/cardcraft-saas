@@ -11,6 +11,7 @@ const path = require('path');
 
 const LOG_FILE = '/tmp/cardcraft-referrals-latest.txt';
 const REFERRALS_DB = '/tmp/cardcraft-referrals-db.json';
+const API_URL = 'https://pacific-vision-production.up.railway.app/api';
 
 // ANSI colors
 const colors = {
@@ -32,18 +33,32 @@ function printHeader() {
   console.log(`${colors.reset}`);
 }
 
-function fetchFromRailway() {
+async function fetchFromAPI() {
   try {
-    // Try to download the log file from Railway
-    execSync(`railway download backend/referral-log.txt ${LOG_FILE} 2>/dev/null`, { stdio: 'pipe' });
-    return true;
-  } catch (e) {
-    // If file doesn't exist yet, create empty one
-    if (!fs.existsSync(LOG_FILE)) {
-      fs.writeFileSync(LOG_FILE, '');
+    // Try API first (no auth needed for local dashboard)
+    const response = await fetch(`${API_URL}/admin/referral-log?token=collin-admin-2026`);
+    if (response.ok) {
+      const data = await response.json();
+      // Convert JSON entries back to log format
+      const logContent = data.entries.map(e => 
+        `[${e.timestamp}] ${e.type}: ${JSON.stringify(e.data)}`
+      ).join('\n');
+      fs.writeFileSync(LOG_FILE, logContent);
+      return true;
     }
-    return false;
+  } catch (e) {
+    // Fall back to Railway CLI
+    try {
+      execSync(`railway download backend/referral-log.txt ${LOG_FILE} 2>/dev/null`, { stdio: 'pipe' });
+      return true;
+    } catch (e2) {
+      // If file doesn't exist yet, create empty one
+      if (!fs.existsSync(LOG_FILE)) {
+        fs.writeFileSync(LOG_FILE, '');
+      }
+    }
   }
+  return false;
 }
 
 function parseLog() {
@@ -71,10 +86,10 @@ function parseLog() {
   return entries;
 }
 
-function showSummary() {
+async function showSummary() {
   printHeader();
   
-  const fetched = fetchFromRailway();
+  const fetched = await fetchFromAPI();
   const entries = parseLog();
   
   if (!fetched && entries.length === 0) {
@@ -186,8 +201,8 @@ function showSummary() {
   console.log(`${colors.cyan}Run with 'watch' flag to auto-refresh every 30 seconds${colors.reset}`);
 }
 
-function exportCSV() {
-  fetchFromRailway();
+async function exportCSV() {
+  await fetchFromAPI();
   const entries = parseLog();
   
   const purchases = entries.filter(e => e.type === 'PURCHASE_COMPLETED');
@@ -210,28 +225,29 @@ function exportCSV() {
   console.log(`${colors.green}✅ Exported to: ${csvPath}${colors.reset}`);
 }
 
-function watchMode() {
-  showSummary();
+async function watchMode() {
+  await showSummary();
   console.log(`\n${colors.yellow}👀 Watching for changes... (Ctrl+C to exit)${colors.reset}\n`);
   
-  setInterval(() => {
-    showSummary();
+  setInterval(async () => {
+    await showSummary();
   }, 30000); // Refresh every 30 seconds
 }
 
 // Main
 const command = process.argv[2];
 
-switch (command) {
-  case 'export':
-    exportCSV();
-    break;
-  case 'watch':
-    watchMode();
-    break;
-  case 'help':
-  case '--help':
-  case '-h':
+(async () => {
+  switch (command) {
+    case 'export':
+      await exportCSV();
+      break;
+    case 'watch':
+      await watchMode();
+      break;
+    case 'help':
+    case '--help':
+    case '-h':
     console.log(`
 CardCraft Referral Dashboard
 
@@ -249,6 +265,7 @@ Examples:
   node referral-dashboard.js export
 `);
     break;
-  default:
-    showSummary();
-}
+    default:
+      await showSummary();
+  }
+})();

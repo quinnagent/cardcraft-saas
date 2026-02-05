@@ -1385,6 +1385,38 @@ app.get('/api/test-openrouter', async (req, res) => {
 // Serve PDFs statically
 app.use('/api/pdfs', express.static(path.join(__dirname, 'pdfs')));
 
+// Expose referral log for local dashboard (simple auth via query param for now)
+app.get('/api/admin/referral-log', (req, res) => {
+  const token = req.query.token;
+  // Simple token check - in production use proper auth
+  if (token !== 'collin-admin-2026') {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  if (!fs.existsSync(LOG_FILE)) {
+    return res.json({ entries: [] });
+  }
+  
+  const content = fs.readFileSync(LOG_FILE, 'utf-8');
+  const entries = [];
+  
+  content.split('\n').forEach(line => {
+    if (!line.trim()) return;
+    const match = line.match(/\[(.*?)\] (\w+): (.*)/);
+    if (match) {
+      try {
+        entries.push({
+          timestamp: match[1],
+          type: match[2],
+          data: JSON.parse(match[3])
+        });
+      } catch (e) {}
+    }
+  });
+  
+  res.json({ entries });
+});
+
 app.listen(PORT, () => {
   console.log(`🎨 CardCraft API running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
