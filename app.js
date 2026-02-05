@@ -720,7 +720,7 @@ async function applyAffiliateCode() {
 }
 
 function updatePricingDisplay() {
-    const isDiscounted = currentState.affiliateDiscount === 40;
+    const isDiscounted = currentState.affiliateDiscount > 0;
     
     ['starter', 'premium', 'unlimited'].forEach(plan => {
         const priceEl = document.getElementById(`price-${plan}`);
@@ -745,7 +745,7 @@ function updateOrderSummary(plan) {
         unlimited: 'Unlimited'
     };
     
-    const price = currentState.affiliateDiscount === 40 
+    const price = currentState.affiliateDiscount > 0 
         ? PRICING[plan].discounted 
         : PRICING[plan].base;
     
@@ -756,7 +756,7 @@ function updateOrderSummary(plan) {
     const affiliateRow = document.getElementById('affiliateRow');
     const affiliateCodeSpan = document.getElementById('orderAffiliateCode');
     
-    if (currentState.affiliateDiscount === 40 && currentState.affiliateCode) {
+    if (currentState.affiliateDiscount > 0 && currentState.affiliateCode) {
         affiliateRow.style.display = 'flex';
         affiliateCodeSpan.textContent = `-${((PRICING[plan].base - PRICING[plan].discounted) / 100).toFixed(0)} (${currentState.affiliateCode})`;
     } else {
