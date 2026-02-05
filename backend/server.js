@@ -1239,15 +1239,32 @@ app.post('/api/admin/affiliates', authenticateAdmin, (req, res) => {
 // Seed COLLINREFERRAL code
 function seedCollinReferral() {
   db.get("SELECT * FROM affiliate_codes WHERE code = 'COLLINREFERRAL'", (err, row) => {
+    if (err) {
+      console.error('Error checking for COLLINREFERRAL:', err);
+      return;
+    }
+    
     if (!row) {
+      // Create the code if it doesn't exist
       db.run(
-        `INSERT INTO affiliate_codes (code, name, email, payout_method, payout_email, discount_percent, commission_percent) 
-         VALUES ('COLLINREFERRAL', 'Collin Referral', 'collin@example.com', 'paypal', 'collin@example.com', 33, 50)`,
+        `INSERT INTO affiliate_codes (code, name, email, payout_method, payout_email, discount_percent, commission_percent, is_active) 
+         VALUES ('COLLINREFERRAL', 'Collin Referral', 'collin@example.com', 'paypal', 'collin@example.com', 35, 50, 1)`,
         (err) => {
           if (err) console.error('Error seeding COLLINREFERRAL:', err);
           else console.log('✅ COLLINREFERRAL affiliate code created');
         }
       );
+    } else if (!row.is_active) {
+      // Reactivate if exists but is inactive
+      db.run(
+        `UPDATE affiliate_codes SET is_active = 1, discount_percent = 35, commission_percent = 50 WHERE code = 'COLLINREFERRAL'`,
+        (err) => {
+          if (err) console.error('Error reactivating COLLINREFERRAL:', err);
+          else console.log('✅ COLLINREFERRAL reactivated');
+        }
+      );
+    } else {
+      console.log('✅ COLLINREFERRAL already active');
     }
   });
 }
@@ -1384,6 +1401,22 @@ app.get('/api/test-openrouter', async (req, res) => {
 
 // Serve PDFs statically
 app.use('/api/pdfs', express.static(path.join(__dirname, 'pdfs')));
+
+// Debug endpoint to check affiliate code status
+app.get('/api/debug/affiliate/:code', (req, res) => {
+  const { code } = req.params;
+  db.get('SELECT * FROM affiliate_codes WHERE code = ?', [code.toUpperCase()], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({
+      exists: !!row,
+      code: row?.code,
+      is_active: row?.is_active,
+      name: row?.name,
+      discount: row?.discount_percent,
+      commission: row?.commission_percent
+    });
+  });
+});
 
 // Expose referral log for local dashboard (simple auth via query param for now)
 app.get('/api/admin/referral-log', (req, res) => {
