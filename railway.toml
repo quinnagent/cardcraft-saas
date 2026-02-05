@@ -1,6 +1,9 @@
 # Railway Configuration
 # Add a volume at /app/data for SQLite persistence
 
+[build]
+builder = "DOCKERFILE"
+
 [deploy]
 startCommand = "node backend/server.js"
 healthcheckPath = "/api/health"
