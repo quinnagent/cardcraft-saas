@@ -106,9 +106,10 @@ function seedAffiliateCodesFromCSV() {
   
   // Try multiple possible paths (local dev vs Railway Docker)
   const possiblePaths = [
-    path.join(__dirname, '..', 'wedding_planners_FINAL.csv'),  // Local dev: backend/../
-    path.join(__dirname, 'wedding_planners_FINAL.csv'),         // Same directory
+    path.join(__dirname, 'wedding_planners_FINAL.csv'),         // Backend directory (Railway)
+    path.join(__dirname, '..', 'wedding_planners_FINAL.csv'),  // Parent directory
     path.join('/app', 'wedding_planners_FINAL.csv'),            // Railway root
+    path.join('/app/backend', 'wedding_planners_FINAL.csv'),    // Railway backend
     path.join(process.cwd(), 'wedding_planners_FINAL.csv'),     // Working directory
     'wedding_planners_FINAL.csv'                                // Relative to cwd
   ];
