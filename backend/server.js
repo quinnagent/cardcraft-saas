@@ -509,8 +509,6 @@ const PRICING = {
 };
 
 // Simple file logger for referral tracking
-const fs = require('fs');
-const path = require('path');
 const LOG_FILE = path.join(__dirname, 'referral-log.txt');
 
 function logReferralEvent(eventType, data) {
