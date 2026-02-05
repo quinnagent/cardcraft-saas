@@ -1,7 +1,17 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const fs = require('fs');
 
-const DB_PATH = path.join(__dirname, 'cardcraft.db');
+// Use Railway volume if available, otherwise use local directory
+const DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(__dirname, 'data');
+
+// Create data directory if it doesn't exist
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
+
+const DB_PATH = path.join(DATA_DIR, 'cardcraft.db');
+console.log('Database path:', DB_PATH);
 
 const db = new sqlite3.Database(DB_PATH, (err) => {
   if (err) {
@@ -83,6 +93,70 @@ function initDatabase() {
   `);
 
   console.log('Database initialized');
+  
+  // Seed affiliate codes from CSV after a short delay
+  setTimeout(() => {
+    seedAffiliateCodesFromCSV();
+  }, 1000);
+}
+
+// Seed affiliate codes from wedding_planners CSV
+function seedAffiliateCodesFromCSV() {
+  const csv = require('csv-parser');
+  const csvPath = path.join(__dirname, '..', 'wedding_planners_FINAL.csv');
+  
+  if (!fs.existsSync(csvPath)) {
+    console.log('No wedding_planners_FINAL.csv found, skipping CSV seed');
+    return;
+  }
+  
+  console.log('Seeding affiliate codes from CSV...');
+  
+  let count = 0;
+  const codes = [];
+  
+  fs.createReadStream(csvPath)
+    .pipe(csv())
+    .on('data', (row) => {
+      if (row.referral_code && row.company) {
+        codes.push({
+          code: row.referral_code.toUpperCase(),
+          name: row.company,
+          email: row.email || 'planner@example.com'
+        });
+      }
+    })
+    .on('end', () => {
+      console.log(`Found ${codes.length} codes in CSV`);
+      
+      // Insert codes (use INSERT OR IGNORE to skip duplicates)
+      let inserted = 0;
+      let errors = 0;
+      
+      codes.forEach(({ code, name, email }) => {
+        db.run(
+          `INSERT OR IGNORE INTO affiliate_codes (code, name, email, payout_method, payout_email, discount_percent, commission_percent, is_active) 
+           VALUES (?, ?, ?, 'paypal', ?, 35, 50, 1)`,
+          [code, name, email],
+          function(err) {
+            if (err) {
+              errors++;
+              if (errors <= 5) console.error(`Error inserting ${code}:`, err.message);
+            } else if (this.changes > 0) {
+              inserted++;
+            }
+            
+            // Log completion when done
+            if (inserted + errors >= codes.length - 5) {
+              console.log(`✅ Seeded ${inserted} new affiliate codes from CSV (${errors} errors)`);
+            }
+          }
+        );
+      });
+    })
+    .on('error', (err) => {
+      console.error('Error reading CSV:', err);
+    });
 }
 
 module.exports = db;

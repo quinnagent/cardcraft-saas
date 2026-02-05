@@ -1,0 +1,11 @@
+# Railway Configuration
+# Add a volume at /app/data for SQLite persistence
+
+[deploy]
+startCommand = "node backend/server.js"
+healthcheckPath = "/api/health"
+
+[mounts]
+# Mount a persistent volume at /app/data
+# This preserves the SQLite database across deployments
+/data = "cardcraft-data"
