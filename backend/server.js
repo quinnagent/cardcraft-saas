@@ -613,9 +613,9 @@ app.post('/api/create-checkout-session', async (req, res) => {
       plan
     };
     
-    // Calculate discount and commission
+    // Calculate discount and commission (50% of amount paid goes to affiliate)
     const discountAmount = appliedCode ? (selectedPlan.baseAmount - selectedPlan.amount) : 0;
-    const commissionAmount = appliedCode ? Math.round(discountAmount * 0.75) : 0; // 75% of discount goes to affiliate
+    const commissionAmount = appliedCode ? Math.round(selectedPlan.amount * 0.5) : 0; // 50% of amount paid
     
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
