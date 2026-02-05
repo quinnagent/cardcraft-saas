@@ -190,6 +190,7 @@ const corsOptions = {
     // Allowed origins list
     const allowedOrigins = [
       'https://quinnagent.github.io',
+      'https://cardcraft-saas.vercel.app',
       'http://localhost:8080',
       'http://localhost:3000'
     ];
