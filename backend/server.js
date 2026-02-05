@@ -509,7 +509,10 @@ const PRICING = {
 };
 
 // Simple file logger for referral tracking
-const LOG_FILE = path.join(__dirname, 'referral-log.txt');
+// Use persistent volume path if available
+const LOG_FILE = process.env.RAILWAY_VOLUME_MOUNT_PATH 
+  ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, 'referral-log.txt')
+  : path.join(__dirname, 'referral-log.txt');
 
 function logReferralEvent(eventType, data) {
   const timestamp = new Date().toISOString();
