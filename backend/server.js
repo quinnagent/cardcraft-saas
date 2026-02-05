@@ -508,6 +508,19 @@ const PRICING = {
   unlimited: { basePrice: 14900, name: 'Unlimited Package', description: 'Unlimited cards', discountedPrice: 9900 }
 };
 
+// Simple file logger for referral tracking
+const fs = require('fs');
+const path = require('path');
+const LOG_FILE = path.join(__dirname, 'referral-log.txt');
+
+function logReferralEvent(eventType, data) {
+  const timestamp = new Date().toISOString();
+  const logEntry = `[${timestamp}] ${eventType}: ${JSON.stringify(data)}\n`;
+  fs.appendFile(LOG_FILE, logEntry, (err) => {
+    if (err) console.error('Error writing to referral log:', err);
+  });
+}
+
 // Validate affiliate code
 app.get('/api/validate-affiliate/:code', async (req, res) => {
   const { code } = req.params;
@@ -515,6 +528,14 @@ app.get('/api/validate-affiliate/:code', async (req, res) => {
   db.get('SELECT * FROM affiliate_codes WHERE code = ? AND is_active = 1', [code.toUpperCase()], (err, row) => {
     if (err) return res.status(500).json({ error: err.message });
     if (!row) return res.json({ valid: false });
+    
+    // Log code application
+    logReferralEvent('CODE_APPLIED', {
+      code: row.code,
+      name: row.name,
+      discount: row.discount_percent,
+      ip: req.ip || req.connection.remoteAddress
+    });
     
     res.json({
       valid: true,
@@ -656,6 +677,17 @@ app.get('/api/checkout-success', async (req, res) => {
       // Track affiliate referral if applicable
       if (affiliateCode && affiliateCode !== '') {
         try {
+          // Log to text file for easy payout tracking
+          logReferralEvent('PURCHASE_COMPLETED', {
+            code: affiliateCode,
+            customer_email: email,
+            order_amount: parseInt(baseAmount),
+            discount_amount: parseInt(discountAmount),
+            commission_amount: parseInt(commissionAmount),
+            session_id: session_id,
+            payment_intent: session.payment_intent
+          });
+          
           db.run(
             `INSERT INTO affiliate_referrals 
              (affiliate_code, customer_email, order_amount, discount_amount, commission_amount, payment_intent_id, status) 
