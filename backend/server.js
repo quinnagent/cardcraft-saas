@@ -1418,6 +1418,22 @@ app.get('/api/debug/affiliate/:code', (req, res) => {
   });
 });
 
+// Emergency endpoint to seed COLLINREFERRAL
+app.get('/api/admin/seed-collin', (req, res) => {
+  db.run(
+    `INSERT OR REPLACE INTO affiliate_codes (code, name, email, payout_method, payout_email, discount_percent, commission_percent, is_active, created_at) 
+     VALUES ('COLLINREFERRAL', 'Collin Referral', 'collin@example.com', 'paypal', 'collin@example.com', 35, 50, 1, CURRENT_TIMESTAMP)`,
+    (err) => {
+      if (err) {
+        console.error('Error seeding COLLINREFERRAL:', err);
+        return res.status(500).json({ error: err.message });
+      }
+      console.log('✅ COLLINREFERRAL seeded via admin endpoint');
+      res.json({ success: true, message: 'COLLINREFERRAL created/reactivated' });
+    }
+  );
+});
+
 // Expose referral log for local dashboard (simple auth via query param for now)
 app.get('/api/admin/referral-log', (req, res) => {
   const token = req.query.token;
