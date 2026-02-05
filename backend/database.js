@@ -47,6 +47,41 @@ function initDatabase() {
     )
   `);
 
+  // Affiliate codes table
+  db.run(`
+    CREATE TABLE IF NOT EXISTS affiliate_codes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      code TEXT UNIQUE NOT NULL,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      discount_percent INTEGER DEFAULT 40,
+      commission_percent INTEGER DEFAULT 30,
+      payout_method TEXT DEFAULT 'paypal',
+      payout_email TEXT,
+      total_sales INTEGER DEFAULT 0,
+      total_commission INTEGER DEFAULT 0,
+      is_active BOOLEAN DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // Referral tracking table
+  db.run(`
+    CREATE TABLE IF NOT EXISTS affiliate_referrals (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      affiliate_code TEXT NOT NULL,
+      customer_email TEXT NOT NULL,
+      order_amount INTEGER NOT NULL,
+      discount_amount INTEGER NOT NULL,
+      commission_amount INTEGER NOT NULL,
+      payment_intent_id TEXT,
+      status TEXT DEFAULT 'pending',
+      paid_at DATETIME,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (affiliate_code) REFERENCES affiliate_codes(code)
+    )
+  `);
+
   console.log('Database initialized');
 }
 

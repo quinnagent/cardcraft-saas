@@ -500,14 +500,77 @@ app.post('/api/create-payment-intent', async (req, res) => {
   }
 });
 
+// Pricing config with affiliate support
+const PRICING = {
+  starter: { basePrice: 2500, name: 'Starter Package', description: 'Up to 25 cards', discountedPrice: 1600 },
+  premium: { basePrice: 5900, name: 'Premium Package', description: 'Up to 75 cards', discountedPrice: 3600 },
+  unlimited: { basePrice: 9900, name: 'Unlimited Package', description: 'Unlimited cards', discountedPrice: 6000 }
+};
+
+// Validate affiliate code
+app.get('/api/validate-affiliate/:code', async (req, res) => {
+  const { code } = req.params;
+  
+  db.get('SELECT * FROM affiliate_codes WHERE code = ? AND is_active = 1', [code.toUpperCase()], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row) return res.json({ valid: false });
+    
+    res.json({
+      valid: true,
+      code: row.code,
+      name: row.name,
+      discount: row.discount_percent,
+      prices: {
+        starter: PRICING.starter.discountedPrice,
+        premium: PRICING.premium.discountedPrice,
+        unlimited: PRICING.unlimited.discountedPrice
+      }
+    });
+  });
+});
+
 // Stripe Checkout - creates a Checkout Session for hosted payment page
 app.post('/api/create-checkout-session', async (req, res) => {
-  const { plan, email, guests, template } = req.body;
+  const { plan, email, guests, template, affiliateCode } = req.body;
+  
+  // Check for affiliate code
+  let discountedPrice = null;
+  let appliedCode = null;
+  
+  if (affiliateCode) {
+    const affiliate = await new Promise((resolve, reject) => {
+      db.get('SELECT * FROM affiliate_codes WHERE code = ? AND is_active = 1', 
+        [affiliateCode.toUpperCase()], (err, row) => {
+          if (err) reject(err);
+          resolve(row);
+        });
+    }).catch(() => null);
+    
+    if (affiliate) {
+      discountedPrice = PRICING[plan]?.discountedPrice;
+      appliedCode = affiliate.code;
+    }
+  }
   
   const planDetails = {
-    starter: { amount: 1900, name: 'Starter Package', description: 'Up to 25 cards' },
-    premium: { amount: 3900, name: 'Premium Package', description: 'Up to 75 cards' },
-    unlimited: { amount: 7900, name: 'Unlimited Package', description: 'Unlimited cards' }
+    starter: { 
+      amount: discountedPrice || PRICING.starter.basePrice, 
+      name: 'Starter Package', 
+      description: 'Up to 25 cards',
+      baseAmount: PRICING.starter.basePrice
+    },
+    premium: { 
+      amount: discountedPrice || PRICING.premium.basePrice, 
+      name: 'Premium Package', 
+      description: 'Up to 75 cards',
+      baseAmount: PRICING.premium.basePrice
+    },
+    unlimited: { 
+      amount: discountedPrice || PRICING.unlimited.basePrice, 
+      name: 'Unlimited Package', 
+      description: 'Unlimited cards',
+      baseAmount: PRICING.unlimited.basePrice
+    }
   };
   
   const selectedPlan = planDetails[plan];
@@ -530,6 +593,10 @@ app.post('/api/create-checkout-session', async (req, res) => {
       plan
     };
     
+    // Calculate discount and commission
+    const discountAmount = appliedCode ? (selectedPlan.baseAmount - selectedPlan.amount) : 0;
+    const commissionAmount = appliedCode ? Math.round(discountAmount * 0.75) : 0; // 75% of discount goes to affiliate
+    
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -537,7 +604,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
         price_data: {
           currency: 'usd',
           product_data: {
-            name: `CardCraft - ${selectedPlan.name}`,
+            name: `CardCraft - ${selectedPlan.name}${appliedCode ? ` (${appliedCode} Discount)` : ''}`,
             description: `${selectedPlan.description} | Template: ${template || 'classic'} | Cards: ${guests?.length || 0}`,
           },
           unit_amount: selectedPlan.amount,
@@ -552,7 +619,11 @@ app.post('/api/create-checkout-session', async (req, res) => {
         projectId,
         email,
         guestCount: guests?.length || 0,
-        template: template || 'classic'
+        template: template || 'classic',
+        affiliateCode: appliedCode || '',
+        baseAmount: selectedPlan.baseAmount.toString(),
+        discountAmount: discountAmount.toString(),
+        commissionAmount: commissionAmount.toString()
       }
     });
     
@@ -578,8 +649,37 @@ app.get('/api/checkout-success', async (req, res) => {
     console.log('Session status:', session.payment_status);
     
     if (session.payment_status === 'paid') {
-      const { projectId, email } = session.metadata;
-      console.log('Project ID:', projectId, 'Email:', email);
+      const { projectId, email, affiliateCode, baseAmount, discountAmount, commissionAmount } = session.metadata;
+      console.log('Project ID:', projectId, 'Email:', email, 'Affiliate:', affiliateCode);
+      
+      // Track affiliate referral if applicable
+      if (affiliateCode && affiliateCode !== '') {
+        try {
+          db.run(
+            `INSERT INTO affiliate_referrals 
+             (affiliate_code, customer_email, order_amount, discount_amount, commission_amount, payment_intent_id, status) 
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [affiliateCode, email, parseInt(baseAmount), parseInt(discountAmount), parseInt(commissionAmount), session.payment_intent, 'pending'],
+            function(err) {
+              if (err) {
+                console.error('Error tracking affiliate referral:', err);
+              } else {
+                console.log('Affiliate referral tracked:', affiliateCode, 'Commission:', commissionAmount);
+                // Update affiliate totals
+                db.run(
+                  `UPDATE affiliate_codes 
+                   SET total_sales = total_sales + 1, 
+                       total_commission = total_commission + ? 
+                   WHERE code = ?`,
+                  [parseInt(commissionAmount), affiliateCode]
+                );
+              }
+            }
+          );
+        } catch (affErr) {
+          console.error('Affiliate tracking error:', affErr);
+        }
+      }
       
       const tempProject = global.tempProjects?.[projectId];
       
@@ -1074,6 +1174,113 @@ app.get('/api/templates', (req, res) => {
   res.json(templates);
 });
 
+// Affiliate management endpoints
+const ADMIN_API_KEY = process.env.ADMIN_API_KEY || 'dev-admin-key';
+
+const authenticateAdmin = (req, res, next) => {
+  const apiKey = req.headers['x-admin-key'];
+  if (apiKey !== ADMIN_API_KEY) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  next();
+};
+
+// Create affiliate code (admin only)
+app.post('/api/admin/affiliates', authenticateAdmin, (req, res) => {
+  const { code, name, email, payout_method, payout_email } = req.body;
+  
+  db.run(
+    `INSERT INTO affiliate_codes (code, name, email, payout_method, payout_email) 
+     VALUES (?, ?, ?, ?, ?)`,
+    [code.toUpperCase(), name, email, payout_method || 'paypal', payout_email || email],
+    function(err) {
+      if (err) {
+        if (err.message.includes('UNIQUE constraint failed')) {
+          return res.status(400).json({ error: 'Affiliate code already exists' });
+        }
+        return res.status(500).json({ error: err.message });
+      }
+      res.json({ id: this.lastID, code: code.toUpperCase(), name, email });
+    }
+  );
+});
+
+// Seed COLLINREFERRAL code
+function seedCollinReferral() {
+  db.get("SELECT * FROM affiliate_codes WHERE code = 'COLLINREFERRAL'", (err, row) => {
+    if (!row) {
+      db.run(
+        `INSERT INTO affiliate_codes (code, name, email, payout_method, payout_email, discount_percent, commission_percent) 
+         VALUES ('COLLINREFERRAL', 'Collin Referral', 'collin@example.com', 'paypal', 'collin@example.com', 40, 30)`,
+        (err) => {
+          if (err) console.error('Error seeding COLLINREFERRAL:', err);
+          else console.log('✅ COLLINREFERRAL affiliate code created');
+        }
+      );
+    }
+  });
+}
+
+// Get all affiliates (admin only)
+app.get('/api/admin/affiliates', authenticateAdmin, (req, res) => {
+  db.all('SELECT * FROM affiliate_codes ORDER BY created_at DESC', (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+// Get affiliate stats
+app.get('/api/admin/affiliates/:code/stats', authenticateAdmin, (req, res) => {
+  const { code } = req.params;
+  
+  db.get('SELECT * FROM affiliate_codes WHERE code = ?', [code.toUpperCase()], (err, affiliate) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!affiliate) return res.status(404).json({ error: 'Affiliate not found' });
+    
+    db.all('SELECT * FROM affiliate_referrals WHERE affiliate_code = ? ORDER BY created_at DESC', 
+      [code.toUpperCase()], (err, referrals) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ affiliate, referrals });
+      });
+  });
+});
+
+// Get pending payouts
+app.get('/api/admin/affiliates/pending-payouts', authenticateAdmin, (req, res) => {
+  db.all(`
+    SELECT 
+      ar.affiliate_code,
+      ac.name,
+      ac.payout_method,
+      ac.payout_email,
+      SUM(ar.commission_amount) as total_pending,
+      COUNT(ar.id) as referral_count
+    FROM affiliate_referrals ar
+    JOIN affiliate_codes ac ON ar.affiliate_code = ac.code
+    WHERE ar.status = 'pending'
+    GROUP BY ar.affiliate_code, ac.name, ac.payout_method, ac.payout_email
+    ORDER BY total_pending DESC
+  `, (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+// Mark referrals as paid (admin only)
+app.post('/api/admin/affiliates/:code/mark-paid', authenticateAdmin, (req, res) => {
+  const { code } = req.params;
+  
+  db.run(
+    `UPDATE affiliate_referrals SET status = 'paid', paid_at = CURRENT_TIMESTAMP 
+     WHERE affiliate_code = ? AND status = 'pending'`,
+    [code.toUpperCase()],
+    function(err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ markedPaid: this.changes });
+    }
+  );
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ 
@@ -1150,4 +1357,7 @@ app.use('/api/pdfs', express.static(path.join(__dirname, 'pdfs')));
 app.listen(PORT, () => {
   console.log(`🎨 CardCraft API running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
+  
+  // Seed default affiliate code
+  seedCollinReferral();
 });

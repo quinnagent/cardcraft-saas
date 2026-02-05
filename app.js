@@ -5,6 +5,13 @@
 // API Configuration
 const API_URL = 'https://pacific-vision-production.up.railway.app/api';
 
+// Pricing config
+const PRICING = {
+    starter: { base: 2500, discounted: 1600, name: 'Starter', description: 'Up to 25 cards' },
+    premium: { base: 5900, discounted: 3600, name: 'Premium', description: 'Up to 75 cards' },
+    unlimited: { base: 9900, discounted: 6000, name: 'Unlimited', description: 'Unlimited cards' }
+};
+
 // State management
 let currentState = {
     step: 1,
@@ -14,7 +21,9 @@ let currentState = {
     messageType: null, // 'prewritten' or 'ai'
     tone: null,
     generatedMessages: [],
-    currentPlan: null
+    currentPlan: null,
+    affiliateCode: null,
+    affiliateDiscount: null
 };
 
 // Pre-written templates
@@ -666,6 +675,95 @@ function showPreviewExamples() {
     showSection('previewExamples');
 }
 
+// Affiliate Code Handling
+async function applyAffiliateCode() {
+    const codeInput = document.getElementById('affiliateCodeInput');
+    const code = codeInput.value.trim().toUpperCase();
+    const statusDiv = document.getElementById('affiliateStatus');
+    
+    if (!code) {
+        statusDiv.textContent = '';
+        return;
+    }
+    
+    statusDiv.textContent = 'Checking...';
+    statusDiv.style.color = '#666';
+    
+    try {
+        const response = await fetch(`${API_URL}/validate-affiliate/${code}`);
+        const data = await response.json();
+        
+        if (data.valid) {
+            currentState.affiliateCode = code;
+            currentState.affiliateDiscount = data.discount;
+            statusDiv.textContent = `✓ ${data.discount}% off applied!`;
+            statusDiv.style.color = '#4a7c59';
+            
+            // Update displayed prices
+            updatePricingDisplay();
+            
+            // Re-update order summary if modal is open
+            if (currentState.currentPlan) {
+                updateOrderSummary(currentState.currentPlan);
+            }
+        } else {
+            currentState.affiliateCode = null;
+            currentState.affiliateDiscount = null;
+            statusDiv.textContent = '✗ Invalid code';
+            statusDiv.style.color = '#c44';
+            updatePricingDisplay();
+        }
+    } catch (err) {
+        statusDiv.textContent = 'Error checking code';
+        statusDiv.style.color = '#c44';
+    }
+}
+
+function updatePricingDisplay() {
+    const isDiscounted = currentState.affiliateDiscount === 40;
+    
+    ['starter', 'premium', 'unlimited'].forEach(plan => {
+        const priceEl = document.getElementById(`price-${plan}`);
+        const originalEl = document.getElementById(`original-price-${plan}`);
+        
+        if (isDiscounted) {
+            const discounted = PRICING[plan].discounted;
+            priceEl.textContent = `$${(discounted / 100).toFixed(0)}`;
+            originalEl.style.display = 'inline';
+            originalEl.textContent = `$${(PRICING[plan].base / 100).toFixed(0)}`;
+        } else {
+            priceEl.textContent = `$${(PRICING[plan].base / 100).toFixed(0)}`;
+            originalEl.style.display = 'none';
+        }
+    });
+}
+
+function updateOrderSummary(plan) {
+    const planNames = {
+        starter: 'Starter (up to 25 cards)',
+        premium: 'Premium (up to 75 cards)',
+        unlimited: 'Unlimited'
+    };
+    
+    const price = currentState.affiliateDiscount === 40 
+        ? PRICING[plan].discounted 
+        : PRICING[plan].base;
+    
+    document.getElementById('orderPlan').textContent = planNames[plan];
+    document.getElementById('orderTotal').textContent = (price / 100).toFixed(0);
+    
+    // Show affiliate discount in modal summary
+    const affiliateRow = document.getElementById('affiliateRow');
+    const affiliateCodeSpan = document.getElementById('orderAffiliateCode');
+    
+    if (currentState.affiliateDiscount === 40 && currentState.affiliateCode) {
+        affiliateRow.style.display = 'flex';
+        affiliateCodeSpan.textContent = `-${((PRICING[plan].base - PRICING[plan].discounted) / 100).toFixed(0)} (${currentState.affiliateCode})`;
+    } else {
+        affiliateRow.style.display = 'none';
+    }
+}
+
 // Payment
 function openPayment(plan) {
     // Check if user has created cards first
@@ -680,8 +778,6 @@ function openPayment(plan) {
     }
     
     currentState.currentPlan = plan;
-    const prices = { starter: 19, premium: 39, unlimited: 79 };
-    const price = prices[plan];
     
     // Update order summary
     const templateNames = {
@@ -697,18 +793,10 @@ function openPayment(plan) {
         minimal: 'Minimal'
     };
     
-    const planNames = {
-        starter: 'Starter (up to 25 cards)',
-        premium: 'Premium (up to 75 cards)',
-        unlimited: 'Unlimited'
-    };
-    
-    const guestCount = currentState.guests?.length || 0;
-    
     document.getElementById('orderTemplate').textContent = templateNames[currentState.template] || 'Classic Elegance';
-    document.getElementById('orderCardCount').textContent = guestCount + ' cards';
-    document.getElementById('orderPlan').textContent = planNames[plan] || 'Premium';
-    document.getElementById('orderTotal').textContent = price;
+    document.getElementById('orderCardCount').textContent = currentState.guests.length + ' cards';
+    
+    updateOrderSummary(plan);
     
     document.getElementById('paymentModal').classList.add('active');
 }
@@ -783,7 +871,8 @@ document.getElementById('paymentForm')?.addEventListener('submit', async (e) => 
                 plan: currentState.currentPlan || 'premium',
                 email: email,
                 guests: currentState.guests || [],
-                template: currentState.template || 'classic'
+                template: currentState.template || 'classic',
+                affiliateCode: currentState.affiliateCode
             })
         });
         

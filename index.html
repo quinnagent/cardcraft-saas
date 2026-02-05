@@ -60,7 +60,7 @@
                         "@type": "Service",
                         "name": "Starter Package"
                     },
-                    "price": "19.00",
+                    "price": "25.00",
                     "priceCurrency": "USD"
                 },
                 {
@@ -69,7 +69,7 @@
                         "@type": "Service",
                         "name": "Premium Package"
                     },
-                    "price": "39.00",
+                    "price": "59.00",
                     "priceCurrency": "USD"
                 },
                 {
@@ -78,7 +78,7 @@
                         "@type": "Service",
                         "name": "Unlimited Package"
                     },
-                    "price": "79.00",
+                    "price": "99.00",
                     "priceCurrency": "USD"
                 }
             ]
@@ -142,8 +142,8 @@
         },
         "offers": {
             "@type": "AggregateOffer",
-            "lowPrice": "19.00",
-            "highPrice": "79.00",
+            "lowPrice": "25.00",
+            "highPrice": "99.00",
             "priceCurrency": "USD",
             "availability": "https://schema.org/InStock"
         },
@@ -1920,10 +1920,25 @@
     <!-- Pricing Section -->
     <section class="section pricing" id="pricing">
         <h2>Simple Pricing</h2>
+        
+        <!-- Affiliate Code Input -->
+        <div style="max-width: 400px; margin: 0 auto 2rem; text-align: center;">
+            <div style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <label style="display: block; margin-bottom: 0.75rem; font-weight: 500; color: var(--primary);">Have a referral code?</label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" id="affiliateCodeInput" placeholder="Enter code (e.g., COLLINREFERRAL)" 
+                           style="flex: 1; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; text-transform: uppercase;">
+                    <button type="button" onclick="applyAffiliateCode()" class="btn" style="padding: 0.75rem 1.5rem;">Apply</button>
+                </div>
+                <div id="affiliateStatus" style="margin-top: 0.5rem; font-size: 0.9rem; min-height: 1.2rem;"></div>
+            </div>
+        </div>
+        
         <div class="pricing-grid">
             <div class="pricing-card">
                 <h3>Starter</h3>
-                <div class="price">$19<span>/one-time</span></div>
+                <div class="price" id="price-starter">$25<span>/one-time</span></div>
+                <div id="original-price-starter" style="display: none; text-decoration: line-through; color: #999; font-size: 1.2rem; margin-top: -1rem; margin-bottom: 1rem;"></div>
                 <ul class="pricing-features">
                     <li>Up to 25 cards</li>
                     <li>All 10 templates</li>
@@ -1937,28 +1952,28 @@
             <div class="pricing-card featured">
                 <div class="popular-badge">Most Popular</div>
                 <h3>Premium</h3>
-                <div class="price">$39<span>/one-time</span></div>
+                <div class="price" id="price-premium">$59<span>/one-time</span></div>
+                <div id="original-price-premium" style="display: none; text-decoration: line-through; color: rgba(255,255,255,0.7); font-size: 1.2rem; margin-top: -1rem; margin-bottom: 1rem;"></div>
                 <ul class="pricing-features">
-                    <li>Up to 100 cards</li>
+                    <li>Up to 75 cards</li>
                     <li>All 10 templates</li>
-                    <li>PDF + PNG download</li>
-                    <li>Advanced customization</li>
+                    <li>PDF download</li>
+                    <li>AI message generation</li>
                     <li>Priority support</li>
-                    <li>Save & edit later</li>
                 </ul>
                 <button class="btn" onclick="openPayment('premium')" style="background: white; color: var(--primary);">Get Started</button>
             </div>
             
             <div class="pricing-card">
                 <h3>Unlimited</h3>
-                <div class="price">$79<span>/one-time</span></div>
+                <div class="price" id="price-unlimited">$99<span>/one-time</span></div>
+                <div id="original-price-unlimited" style="display: none; text-decoration: line-through; color: #999; font-size: 1.2rem; margin-top: -1rem; margin-bottom: 1rem;"></div>
                 <ul class="pricing-features">
                     <li>Unlimited cards</li>
                     <li>All 10 templates</li>
-                    <li>All file formats</li>
-                    <li>White-label option</li>
+                    <li>PDF download</li>
+                    <li>AI message generation</li>
                     <li>Priority support</li>
-                    <li>Custom template request</li>
                 </ul>
                 <button class="btn btn-outline" onclick="openPayment('unlimited')">Get Started</button>
             </div>
@@ -1993,9 +2008,13 @@
                     <span>Plan:</span>
                     <span id="orderPlan" style="font-weight: 500;">Premium</span>
                 </div>
+                <div id="affiliateRow" style="display: none; justify-content: space-between; margin-bottom: 0.5rem; color: #4a7c59;">
+                    <span>Referral Discount:</span>
+                    <span id="orderAffiliateCode" style="font-weight: 500;"></span>
+                </div>
                 <div style="border-top: 1px solid #ddd; margin-top: 1rem; padding-top: 1rem; display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: 600;">
                     <span>Total:</span>
-                    <span>$<span id="orderTotal">39</span></span>
+                    <span>$<span id="orderTotal">59</span></span>
                 </div>
             </div>
             
