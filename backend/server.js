@@ -1402,6 +1402,41 @@ app.get('/api/test-openrouter', async (req, res) => {
 // Serve PDFs statically
 app.use('/api/pdfs', express.static(path.join(__dirname, 'pdfs')));
 
+// Debug endpoint to check file system and CSV
+app.get('/api/debug/files', (req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+  
+  const checks = {
+    cwd: process.cwd(),
+    __dirname: __dirname,
+    paths: {}
+  };
+  
+  const paths = [
+    'wedding_planners_FINAL.csv',
+    path.join(__dirname, '..', 'wedding_planners_FINAL.csv'),
+    path.join(__dirname, 'wedding_planners_FINAL.csv'),
+    path.join('/app', 'wedding_planners_FINAL.csv'),
+    path.join(process.cwd(), 'wedding_planners_FINAL.csv')
+  ];
+  
+  paths.forEach(p => {
+    checks.paths[p] = fs.existsSync(p);
+  });
+  
+  // List files in cwd and __dirname
+  try {
+    checks.cwdFiles = fs.readdirSync(process.cwd()).filter(f => f.includes('.csv') || f.includes('wedding'));
+  } catch(e) { checks.cwdFiles = ['Error: ' + e.message]; }
+  
+  try {
+    checks.dirnameFiles = fs.readdirSync(__dirname).filter(f => f.includes('.csv') || f.includes('wedding'));
+  } catch(e) { checks.dirnameFiles = ['Error: ' + e.message]; }
+  
+  res.json(checks);
+});
+
 // Debug endpoint to check affiliate code status
 app.get('/api/debug/affiliate/:code', (req, res) => {
   const { code } = req.params;
