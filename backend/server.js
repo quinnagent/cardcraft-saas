@@ -503,9 +503,9 @@ app.post('/api/create-payment-intent', async (req, res) => {
 
 // Pricing config with affiliate support
 const PRICING = {
-  starter: { basePrice: 2500, name: 'Starter Package', description: 'Up to 25 cards', discountedPrice: 1600 },
-  premium: { basePrice: 5900, name: 'Premium Package', description: 'Up to 75 cards', discountedPrice: 3600 },
-  unlimited: { basePrice: 9900, name: 'Unlimited Package', description: 'Unlimited cards', discountedPrice: 6000 }
+  starter: { basePrice: 2900, name: 'Starter Package', description: 'Up to 25 cards', discountedPrice: 1900 },
+  premium: { basePrice: 7400, name: 'Premium Package', description: 'Up to 75 cards', discountedPrice: 4900 },
+  unlimited: { basePrice: 14900, name: 'Unlimited Package', description: 'Unlimited cards', discountedPrice: 9900 }
 };
 
 // Validate affiliate code
@@ -1212,7 +1212,7 @@ function seedCollinReferral() {
     if (!row) {
       db.run(
         `INSERT INTO affiliate_codes (code, name, email, payout_method, payout_email, discount_percent, commission_percent) 
-         VALUES ('COLLINREFERRAL', 'Collin Referral', 'collin@example.com', 'paypal', 'collin@example.com', 40, 30)`,
+         VALUES ('COLLINREFERRAL', 'Collin Referral', 'collin@example.com', 'paypal', 'collin@example.com', 33, 50)`,
         (err) => {
           if (err) console.error('Error seeding COLLINREFERRAL:', err);
           else console.log('✅ COLLINREFERRAL affiliate code created');

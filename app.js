@@ -7,9 +7,9 @@ const API_URL = 'https://pacific-vision-production.up.railway.app/api';
 
 // Pricing config
 const PRICING = {
-    starter: { base: 2500, discounted: 1600, name: 'Starter', description: 'Up to 25 cards' },
-    premium: { base: 5900, discounted: 3600, name: 'Premium', description: 'Up to 75 cards' },
-    unlimited: { base: 9900, discounted: 6000, name: 'Unlimited', description: 'Unlimited cards' }
+    starter: { base: 2900, discounted: 1900, name: 'Starter', description: 'Up to 25 cards' },
+    premium: { base: 7400, discounted: 4900, name: 'Premium', description: 'Up to 75 cards' },
+    unlimited: { base: 14900, discounted: 9900, name: 'Unlimited', description: 'Unlimited cards' }
 };
 
 // State management

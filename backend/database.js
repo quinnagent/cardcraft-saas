@@ -54,7 +54,7 @@ function initDatabase() {
       code TEXT UNIQUE NOT NULL,
       name TEXT NOT NULL,
       email TEXT NOT NULL,
-      discount_percent INTEGER DEFAULT 40,
+      discount_percent INTEGER DEFAULT 35,
       commission_percent INTEGER DEFAULT 30,
       payout_method TEXT DEFAULT 'paypal',
       payout_email TEXT,
