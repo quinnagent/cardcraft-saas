@@ -103,10 +103,29 @@ function initDatabase() {
 // Seed affiliate codes from wedding_planners CSV
 function seedAffiliateCodesFromCSV() {
   const csv = require('csv-parser');
-  const csvPath = path.join(__dirname, '..', 'wedding_planners_FINAL.csv');
   
-  if (!fs.existsSync(csvPath)) {
-    console.log('No wedding_planners_FINAL.csv found, skipping CSV seed');
+  // Try multiple possible paths (local dev vs Railway Docker)
+  const possiblePaths = [
+    path.join(__dirname, '..', 'wedding_planners_FINAL.csv'),  // Local dev: backend/../
+    path.join(__dirname, 'wedding_planners_FINAL.csv'),         // Same directory
+    path.join('/app', 'wedding_planners_FINAL.csv'),            // Railway root
+    path.join(process.cwd(), 'wedding_planners_FINAL.csv'),     // Working directory
+    'wedding_planners_FINAL.csv'                                // Relative to cwd
+  ];
+  
+  let csvPath = null;
+  for (const p of possiblePaths) {
+    console.log('Checking for CSV at:', p);
+    if (fs.existsSync(p)) {
+      csvPath = p;
+      console.log('Found CSV at:', p);
+      break;
+    }
+  }
+  
+  if (!csvPath) {
+    console.log('No wedding_planners_FINAL.csv found at any location, skipping CSV seed');
+    console.log('Checked paths:', possiblePaths);
     return;
   }
   
