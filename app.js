@@ -932,3 +932,39 @@ async function saveProject() {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { currentState, generateAIMessage };
 }
+
+// Contact Form Functions
+function openContactForm() {
+    document.getElementById('contactModal').classList.add('active');
+}
+
+function closeContactForm() {
+    document.getElementById('contactModal').classList.remove('active');
+    // Reset form
+    document.getElementById('contactForm').reset();
+}
+
+function submitContactForm(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('contactEmail').value;
+    const subject = document.getElementById('contactSubject').value;
+    const message = document.getElementById('contactMessage').value;
+    
+    // Create mailto link (simple form submission)
+    const subjectLine = `[CardCraft Support] ${subject}`;
+    const body = `Email: ${email}%0D%0A%0D%0AMessage:%0D%0A${encodeURIComponent(message)}`;
+    const mailtoUrl = `mailto:quinn.agent@gmail.com?subject=${encodeURIComponent(subjectLine)}&body=${body}`;
+    
+    // Open default email client
+    window.location.href = mailtoUrl;
+    
+    // Show confirmation
+    alert('Your email client should open with the message. If it does not, please contact us directly at quinn.agent@gmail.com');
+    closeContactForm();
+}
+
+// Close contact modal on outside click
+document.getElementById('contactModal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'contactModal') closeContactForm();
+});

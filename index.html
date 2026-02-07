@@ -1468,6 +1468,7 @@
             <a href="#templates" onclick="showSection('templates'); return false;">Templates</a>
             <a href="#how-it-works" onclick="scrollToSection('how-it-works'); return false;">How It Works</a>
             <a href="#pricing" onclick="showSection('pricing'); return false;">Pricing</a>
+            <a href="#contact" onclick="openContactForm(); return false;" style="color: var(--secondary);">Contact Support</a>
             <a href="#upload" class="btn" onclick="startCreating(); return false;">Get Started</a>
         </div>
     </nav>
@@ -1501,8 +1502,8 @@
     <!-- Hero Section -->
     <section class="hero" id="hero">
         <div class="ai-badge">✨ Now with AI-Powered Messages</div>
-        <h1>Wedding Thank You Cards<br>Made Beautifully Simple</h1>
-        <p>Choose from 10 elegant templates, upload your guest list, and let our AI write personalized thank you cards for each guest. Or use our pre-written templates. Print at home in minutes.</p>
+        <h1>Print at Home — Wedding Thank You Cards Made Beautifully Simple</h1>
+        <p>Create beautiful personalized wedding thank you cards in minutes. Choose from 10 elegant templates, upload your guest list, and download print-ready PDFs. Print at home on your own schedule — no minimum orders, no shipping waits, no printing shop required. Starting at just $29.</p>
         <div class="hero-cta">
             <a href="#messageType" class="btn btn-large" onclick="startCreating()" style="background: linear-gradient(135deg, var(--primary) 0%, #7a5a4a 100%);">🚀 Start with AI</a>
             <a href="#templates" class="btn btn-outline" onclick="showSection('templates')">Browse Templates</a>
@@ -2041,6 +2042,40 @@
     
     <!-- Stripe.js -->
     <script src="https://js.stripe.com/v3/"></script>
+
+    <!-- Contact Support Modal -->
+    <div class="modal" id="contactModal">
+        <div class="modal-content" style="max-width: 550px;">
+            <div class="modal-header">
+                <h3>Contact Customer Service</h3>
+                <button class="close-btn" onclick="closeContactForm()">×</button>
+            </div>
+            <form id="contactForm" onsubmit="submitContactForm(event)">
+                <div class="form-group">
+                    <label>Your Email</label>
+                    <input type="email" id="contactEmail" placeholder="you@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Subject</label>
+                    <select id="contactSubject" style="width: 100%; padding: 0.875rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;">
+                        <option value="question">General Question</option>
+                        <option value="issue">Order Issue</option>
+                        <option value="template">Template Question</option>
+                        <option value="payment">Payment/Billing</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea id="contactMessage" rows="5" placeholder="How can we help you?" required style="width: 100%; padding: 0.875rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; resize: vertical; font-family: inherit;"></textarea>
+                </div>
+                <button type="submit" class="pay-btn">Send to Support Team</button>
+                <p style="text-align: center; color: #666; font-size: 0.875rem; margin-top: 1rem;">
+                    📧 Your message will be sent to quinn.agent@gmail.com
+                </p>
+            </form>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer>
